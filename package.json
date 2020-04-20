@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --open --hot --mode development",
+    "start": "webpack-dev-server --port 8080 --open --hot --mode development --host 172.29.37.13",
     "build": "webpack --mode production"
   },
   "repository": {
@@ -41,6 +41,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "aframe": "^1.0.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }
