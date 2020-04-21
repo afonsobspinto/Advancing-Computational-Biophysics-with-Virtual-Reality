@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --port 8080 --open --hot --mode development --host 172.29.37.13",
+    "start": "webpack-dev-server --open --mode development",
     "build": "webpack --mode production"
   },
   "repository": {
