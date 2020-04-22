@@ -1,26 +1,69 @@
 import React, { Component } from 'react';
 import 'aframe';
+import 'super-hands';
+import 'aframe-event-set-component';
 
 export default class App extends Component {
   render() {
     return (
       <a-scene background="color: #FAFAFA">
-        <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" shadow />
-        <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E" shadow />
-        <a-cylinder
-          position="1 0.75 -3"
-          radius="0.5"
-          height="1.5"
-          color="#FFC65D"
-          shadow
+        <a-assets>
+          <a-mixin
+            id="pointer"
+            raycaster="showLine: true; objects: .cube"
+            super-hands="colliderEvent: raycaster-intersection;
+                               colliderEventProperty: els;
+                               colliderEndEvent:raycaster-intersection-cleared;
+                               colliderEndEventProperty: clearedEls;"
+          />
+          <a-mixin
+            id="controller-right"
+            mixin="pointer"
+            vive-controls="hand: right"
+            oculus-touch-controls="hand: right"
+            windows-motion-controls="hand: right"
+            gearvr-controls
+            daydream-controls
+            oculus-go-controls
+          />
+          <a-mixin
+            id="controller-left"
+            mixin="pointer"
+            vive-controls="hand: left"
+            oculus-touch-controls="hand: left"
+            windows-motion-controls="hand: left"
+          />
+          <a-mixin
+            id="cube"
+            geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5"
+            hoverable
+            grabbable
+            stretchable
+            event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+            event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+          />
+        </a-assets>
+        <a-entity>
+          <a-entity id="rhand" mixin="controller-right" />
+          <a-entity id="lhand" mixin="controller-left" />
+        </a-entity>
+        <a-entity
+          class="cube"
+          mixin="cube"
+          position="0 1.6 -1.5"
+          material="color: red"
         />
-        <a-plane
-          position="0 0 -4"
-          rotation="-90 0 0"
-          width="4"
-          height="4"
-          color="#7BC8A4"
-          shadow
+        <a-entity
+          class="cube"
+          mixin="cube"
+          position="-1 1.6 -1"
+          material="color: blue"
+        />
+        <a-entity
+          class="cube"
+          mixin="cube"
+          position="1 1.6 -1"
+          material="color: green"
         />
       </a-scene>
     );
