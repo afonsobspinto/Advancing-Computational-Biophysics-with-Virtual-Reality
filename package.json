@@ -41,8 +41,10 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "aframe": "^1.0.4",
+    "aframe": "0.8.2",
+    "aframe-event-set-component": "^5.0.0",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "super-hands": "^3.0.0"
   }
 }
