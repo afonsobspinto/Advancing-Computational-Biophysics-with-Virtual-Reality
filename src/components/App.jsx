@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import 'aframe';
 import 'super-hands';
 import 'aframe-event-set-component';
+import './events/ChangeColorOnGrab';
 
 export default class App extends Component {
   render() {
@@ -41,6 +42,7 @@ export default class App extends Component {
             stretchable
             event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
             event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false"
+            change-color-on-grab="color: black"
           />
         </a-assets>
         <a-entity>
