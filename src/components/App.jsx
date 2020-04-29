@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import 'aframe';
 import 'aframe-log-component';
 import './aframe/three-js-object';
-import './aframe/intersect-color-change';
+import './aframe/interactable';
+import './aframe/extended-laser-controls';
 
 export default class App extends Component {
   render() {
@@ -23,18 +24,20 @@ export default class App extends Component {
           laser-controls="hand: left"
           line="color: blue"
           raycaster="objects: .collidable"
+          extended-laser-controls
         />
         <a-entity
           id="rightHand"
           laser-controls="hand: right"
           raycaster="objects: .collidable"
           line="color: blue"
+          extended-laser-controls
         />
         <a-entity
           class="collidable"
-          three-js-object="color: green"
+          three-js-object
           position="0 1 -5"
-          intersect-color-change
+          interactable
         />
       </a-scene>
     );
