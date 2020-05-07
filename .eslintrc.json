@@ -8,7 +8,9 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly",
     "AFRAME": "readonly",
-    "THREE": "readonly"
+    "THREE": "readonly",
+    "GEPPETTO": "readonly",
+    "Instances": "readonly"
   },
   "parserOptions": {
     "ecmaFeatures": {
@@ -26,6 +28,9 @@
     "no-process-exit": "off",
     "object-shorthand": "off",
     "class-methods-use-this": "off",
-    "react/prefer-stateless-function": "off"
+    "react/prefer-stateless-function": "off",
+    "no-restricted-syntax": "off",
+    "prefer-destructuring": ["error", { "object": true, "array": false }],
+    "no-plusplus": "off"
   }
 }
