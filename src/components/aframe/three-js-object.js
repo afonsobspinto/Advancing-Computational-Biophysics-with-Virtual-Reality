@@ -1,14 +1,12 @@
 AFRAME.registerComponent('three-js-object', {
+  schema: {
+    threeObject: { type: 'array' },
+  },
   init: function () {
-    console.log(this.el);
-    console.log(this.data);
-    const box = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({
-      color: '#00FF00',
-    });
-    this.el.setObject3D('mesh', new THREE.Mesh(box, material));
+    console.log(this.data.threeObject);
+    this.el.setObject3D(this.attrName, new THREE.Mesh());
   },
   remove: function () {
-    this.el.removeObject3D('mesh');
+    this.el.removeObject3D(this.attrName);
   },
 });

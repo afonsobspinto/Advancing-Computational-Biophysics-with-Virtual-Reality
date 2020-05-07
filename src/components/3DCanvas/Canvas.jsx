@@ -1,29 +1,36 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ThreeDEngine from './ThreeDEngine';
+import GeppettoThree from './GeppettoThree';
 import 'aframe';
-import '../aframe/three-js-object';
 
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    this.engine = null;
-    this.threeObjects = [];
+    const { threshold, instances } = this.props;
+    this.geppettoThree = new GeppettoThree(threshold);
+    this.state = {
+      threeObjects: this.geppettoThree.getThreeObjects(instances),
+    };
   }
 
   componentDidMount() {
-    const { threshold, instances } = this.props;
+    const { threeObjects } = this.state;
     const scene = document.querySelector('a-scene');
-    this.engine = new ThreeDEngine(scene, threshold);
-    this.threeObjects = this.engine.getThreeObjects(instances);
+
+    for (let i = 0; i < scene.children.length; i++) {
+      const entity = scene.children[i];
+      const object = threeObjects[i];
+      entity.setObject3D('mesh', object);
+    }
   }
 
   render() {
+    const { threeObjects } = this.state;
     return (
       <a-scene>
-        {this.threeObjects.map((object, i) => (
+        {threeObjects.map((i) => (
           // eslint-disable-next-line react/no-array-index-key
-          <a-entity key={i} three-js-object={JSON.stringify(object)} />
+          <a-entity key={i}> </a-entity>
         ))}
       </a-scene>
     );
