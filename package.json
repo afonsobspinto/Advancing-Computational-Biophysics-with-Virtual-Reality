@@ -21,8 +21,10 @@
   "homepage": "https://github.com/afonsobspinto/Advancing-Computational-Biophysics-with-Virtual-Reality#readme",
   "devDependencies": {
     "@babel/core": "^7.9.0",
+    "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.9.4",
+    "@geppettoengine/geppetto-client": "file:./geppetto-client",
     "babel-loader": "^8.1.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.1.0",
@@ -43,6 +45,7 @@
   "dependencies": {
     "aframe": "^1.0.4",
     "aframe-log-component": "^1.0.7",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }

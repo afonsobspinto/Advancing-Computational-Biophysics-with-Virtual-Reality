@@ -1,0 +1,43 @@
+/* eslint-disable import/no-unresolved */
+import Manager from '@geppettoengine/geppetto-client/js/common/Manager';
+import AA from '@geppettoengine/geppetto-client/js/geppettoModel/model/ArrayElementInstance';
+
+const GEPPETTO = {};
+window.GEPPETTO = GEPPETTO;
+require('@geppettoengine/geppetto-client/js/common/GEPPETTO.Resources').default(
+  GEPPETTO
+);
+require('@geppettoengine/geppetto-client/js/pages/geppetto/GEPPETTO.Events').default(
+  GEPPETTO
+);
+const ModelFactory = require('@geppettoengine/geppetto-client/js/geppettoModel/ModelFactory').default(
+  GEPPETTO
+);
+
+GEPPETTO.Utility = {};
+GEPPETTO.Utility.extractMethodsFromObject = () => [];
+GEPPETTO.trigger = (evt) => console.log(evt, 'triggered');
+GEPPETTO.Manager = new Manager();
+console.warn = () => null;
+GEPPETTO.CommandController = {
+  log: console.log,
+  createTags: (a, b) => null,
+};
+GEPPETTO.ComponentFactory = {
+  addExistingComponent: console.log,
+};
+GEPPETTO.on = console.log;
+GEPPETTO.off = console.log;
+GEPPETTO.UnitsController = {
+  getUnitLabel: function (unit) {
+    return unit;
+  },
+  hasUnit: function (unit) {
+    return true;
+  },
+};
+window.Project = {
+  getId: function () {
+    return 1936486795;
+  },
+};

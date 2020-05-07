@@ -28,6 +28,13 @@ AFRAME.registerComponent('extended-laser-controls', {
       AFRAME.log('extended-laser-controls:triggerup');
       emitEvent('triggerup', raycaster);
     });
+
+    el.addEventListener('thumbupstart', function (evt) {
+      AFRAME.log('extended-laser-controls:thumbupstart');
+    });
+    el.addEventListener('thumbupend', function (evt) {
+      AFRAME.log('extended-laser-controls:thumbupend');
+    });
   },
   tick: function (t, dt) {},
 });

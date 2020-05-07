@@ -12,6 +12,12 @@ module.exports = {
     publicPath: '',
   },
   resolve: {
+    alias: {
+      '@geppettoengine/geppetto-client': path.resolve(
+        __dirname,
+        './geppetto-client/geppetto-client'
+      ),
+    },
     extensions: ['.js', '.jsx'],
   },
   module: {
