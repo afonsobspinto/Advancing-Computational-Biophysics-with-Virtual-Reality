@@ -3,14 +3,15 @@
 export default class GeppettoThree {
   constructor(threshold = 2000) {
     this.threshold = threshold;
-    this.threeObjects = [];
     this.complexity = 0;
+    this.meshes = {};
   }
 
-  getThreeObjects(instances) {
-    this.threeObjects = [];
+  getThreeMeshes(instances) {
+    this.meshes = {};
     this.traverseInstances(instances);
-    return this.threeObjects;
+    // TODO: set geometry type
+    return this.meshes;
   }
 
   traverseInstances(instances) {
@@ -41,22 +42,121 @@ export default class GeppettoThree {
   }
 
   buildVisualInstance(instance) {
-    this.generate3DObjects(instance);
-
+    const meshes = this.generate3DObjects(instance);
+    this.init3DObject(meshes, instance);
     // Todo: add init3DObject
   }
 
+  init3DObject(meshes, instance) {
+    const instancePath = instance.getInstancePath();
+    const position = instance.getPosition();
+    for (const m in meshes) {
+      const mesh = meshes[m];
+
+      mesh.instancePath = instancePath;
+      // if the model file is specifying a position for the loaded meshes then we translate them here
+      if (position != null) {
+        const p = new THREE.Vector3(position.x, position.y, position.z);
+        mesh.position.set(p.x, p.y, p.z);
+        mesh.geometry.verticesNeedUpdate = true;
+        mesh.updateMatrix();
+      }
+      this.meshes[instancePath] = mesh;
+      this.meshes[instancePath].visible = true;
+      this.meshes[instancePath].ghosted = false;
+      this.meshes[instancePath].defaultOpacity = 1;
+      this.meshes[instancePath].selected = false;
+      this.meshes[instancePath].input = false;
+      this.meshes[instancePath].output = false;
+
+      // TODO: Add split meshes
+      // Split anything that was splitted before
+    }
+  }
+
   generate3DObjects(instance) {
-    // TODO add previous3DObject
+    // TODO: Add previous meshes
+    // TODO: Add split meshes
     // TODO: This can be optimised, no need to create both
+    // TODO: Add color
     const materials = {
       mesh: this.getMeshPhongMaterial(),
       line: this.getLineMaterial(),
     };
 
-    this.walkVisTreeGen3DObjs(instance, materials);
+    const instanceObjects = [];
+    const threeDeeObjList = this.walkVisTreeGen3DObjs(instance, materials);
+    if (threeDeeObjList.length > 1) {
+      const mergedObjs = this.merge3DObjects(threeDeeObjList, materials);
+      // investigate need to obj.dispose for obj in threeDeeObjList
+      if (mergedObjs != null) {
+        mergedObjs.instancePath = instance.getInstancePath();
+        instanceObjects.push(mergedObjs);
+      } else {
+        for (const obj in threeDeeObjList) {
+          threeDeeObjList[obj].instancePath = instance.getInstancePath();
+          instanceObjects.push(threeDeeObjList[obj]);
+        }
+      }
+    } else if (threeDeeObjList.length == 1) {
+      // only one object in list, add it to local array and set
+      instanceObjects.push(threeDeeObjList[0]);
+      instanceObjects[0].instancePath = instance.getInstancePath();
+    }
+    return instanceObjects;
+  }
 
-    // TODO: MergeObjects
+  merge3DObjects(objArray, materials) {
+    const mergedMeshesPaths = [];
+    let ret = null;
+    let mergedLines;
+    let mergedMeshes;
+    objArray.forEach(function (obj) {
+      if (obj instanceof THREE.Line) {
+        if (mergedLines === undefined) {
+          mergedLines = new THREE.Geometry();
+        }
+        mergedLines.vertices.push(obj.geometry.vertices[0]);
+        mergedLines.vertices.push(obj.geometry.vertices[1]);
+      } else if (obj.geometry.type == 'Geometry') {
+        // This catches both Collada an OBJ
+        if (objArray.length > 1) {
+          throw Error('Merging of multiple OBJs or Colladas not supported');
+        } else {
+          ret = obj;
+        }
+      } else {
+        if (mergedMeshes === undefined) {
+          mergedMeshes = new THREE.Geometry();
+        }
+        obj.geometry.dynamic = true;
+        obj.geometry.verticesNeedUpdate = true;
+        obj.updateMatrix();
+        mergedMeshes.merge(obj.geometry, obj.matrix);
+      }
+      mergedMeshesPaths.push(obj.instancePath);
+    });
+
+    if (mergedLines === undefined) {
+      /*
+       * There are no line geometries, we just create a mesh for the merge of the solid geometries
+       * and apply the mesh material
+       */
+      ret = new THREE.Mesh(mergedMeshes, materials.mesh);
+    } else {
+      ret = new THREE.LineSegments(mergedLines, materials.line);
+      if (mergedMeshes != undefined) {
+        // we merge into a single mesh both types of geometries (from lines and 3D objects)
+        const tempmesh = new THREE.Mesh(mergedMeshes, materials.mesh);
+        ret.geometry.merge(tempmesh.geometry, tempmesh.matrix);
+      }
+    }
+
+    if (ret != null && !Array.isArray(ret)) {
+      ret.mergedMeshesPaths = mergedMeshesPaths;
+    }
+
+    return ret;
   }
 
   getMeshPhongMaterial(color) {
@@ -199,7 +299,6 @@ export default class GeppettoThree {
     }
 
     if (threeObject) {
-      this.threeObjects.push(threeObject);
       // TODO: shouldn't that be the vistree? why is it also done at the loadEntity level??
       // TODO: Add visuamModelMap
     }
