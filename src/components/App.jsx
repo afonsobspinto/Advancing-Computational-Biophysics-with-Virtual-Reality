@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Canvas from './3DCanvas/Canvas';
+import ErrorBoundary from './ErrorBoundary';
 import model from '../models/auditory_cortex.json';
 
 require('../utilities/GeppettoLoader');
@@ -9,12 +10,15 @@ export default class App extends Component {
     super(props);
     GEPPETTO.Manager.loadModel(model);
     this.instances = [Instances.getInstance('acnet2')];
-    console.log(this.instances);
   }
 
   render() {
     return (
-      <div>{this.instances ? <Canvas instances={this.instances} /> : ''}</div>
+      <div style={{ position: 'absolute', height: '100%', width: '100%' }}>
+        <ErrorBoundary>
+          {this.instances ? <Canvas instances={this.instances} /> : ''}
+        </ErrorBoundary>
+      </div>
     );
   }
 }
