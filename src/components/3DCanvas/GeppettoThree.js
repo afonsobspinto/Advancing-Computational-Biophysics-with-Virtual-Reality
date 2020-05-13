@@ -442,4 +442,44 @@ export default class GeppettoThree {
 
     return threeObject;
   }
+
+  setColor(instancePath, color) {
+    if (!this.hasInstance(instancePath)) {
+      return;
+    }
+    if (typeof color === 'string') {
+      color = color.replace(/0X/i, '#');
+    }
+    const meshes = this.getRealMeshesForInstancePath(instancePath);
+    if (meshes.length > 0) {
+      for (let i = 0; i < meshes.length; i++) {
+        const mesh = meshes[i];
+        if (mesh) {
+          const that = this;
+          mesh.traverse(function (object) {
+            if (Object.prototype.hasOwnProperty.call(object, 'material')) {
+              that.setThreeColor(object.material.color, color);
+              object.material.defaultColor = color;
+            }
+          });
+        }
+      }
+    }
+  }
+
+  hasInstance(instance) {
+    const instancePath =
+      typeof instance == 'string' ? instance : instance.getInstancePath();
+    return this.meshes[instancePath] != undefined;
+  }
+
+  getRealMeshesForInstancePath(instancePath) {
+    const meshes = [];
+
+    // TODO: Add split meshes
+    if (instancePath in this.meshes) {
+      meshes.push(this.meshes[instancePath]);
+    }
+    return meshes;
+  }
 }
