@@ -56,7 +56,11 @@ class Canvas extends Component {
           raycaster="objects: .collidable"
           wasd-controls
         />
-        <a-entity id="entity_canvas" position="0 1 -5">
+        <a-entity
+          id="entity_canvas"
+          position="-20 -20 -80"
+          scale="0.1, 0.1 0.1"
+        >
           {Object.keys(threeMeshes).map((key) => (
             // eslint-disable-next-line react/no-array-index-key
             <a-entity key={`a-entity${key}`} id={`a-entity${key}`} />
