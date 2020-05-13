@@ -1,7 +1,12 @@
+/* eslint-disable import/no-unresolved */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import GeppettoThree from './GeppettoThree';
+import Instance from '@geppettoengine/geppetto-client/js/geppettoModel/model/Instance';
+import ArrayInstance from '@geppettoengine/geppetto-client/js/geppettoModel/model/ArrayInstance';
+import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
+import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
+import GeppettoThree from './GeppettoThree';
 
 class Canvas extends Component {
   constructor(props) {
@@ -14,7 +19,38 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
+    const { colorMap } = this.props;
+    if (colorMap !== {}) {
+      for (const path in colorMap) {
+        this.setColor(path, colorMap[path]);
+      }
+    }
     this.setEntityMeshes();
+  }
+
+  setColor(path, color) {
+    // eslint-disable-next-line no-eval
+    const entity = eval(path);
+    if (entity.hasCapability('VisualCapability')) {
+      if (entity instanceof Instance || entity instanceof ArrayInstance) {
+        this.geppettoThree.setColor(path, color);
+
+        if (typeof entity.getChildren === 'function') {
+          const children = entity.getChildren();
+          for (let i = 0; i < children.length; i++) {
+            this.setColor(children[i].getInstancePath(), color);
+          }
+        }
+      } else if (entity instanceof Type || entity instanceof Variable) {
+        // fetch all instances for the given type or variable and call hide on each
+        // TODO: Pass ModelFactory to prop?
+        const instances = GEPPETTO.ModelFactory.getAllInstancesOf(entity);
+        for (let j = 0; j < instances.length; j++) {
+          this.setColor(instances[j].getInstancePath(), color);
+        }
+      }
+    }
+    return this;
   }
 
   setEntityMeshes() {
@@ -73,11 +109,13 @@ class Canvas extends Component {
 
 Canvas.defaultProps = {
   threshold: 1000,
+  colorMap: {},
 };
 
 Canvas.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.object).isRequired,
   threshold: PropTypes.number,
+  colorMap: PropTypes.object,
 };
 
 export default Canvas;
