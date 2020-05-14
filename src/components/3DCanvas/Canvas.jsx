@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 /* eslint-disable import/no-unresolved */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -7,6 +8,10 @@ import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
 import GeppettoThree from './GeppettoThree';
+import ShowcaseGallery from '../ShowcaseGallery';
+import LaserControls from '../LaserControls';
+import VFB from '../../../assets/showcase-gallery/vfb.png';
+import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 
 class Canvas extends Component {
   constructor(props) {
@@ -81,9 +86,18 @@ class Canvas extends Component {
 
   render() {
     const { threeMeshes } = this.state;
+    const { sceneBackground } = this.props;
 
     return (
-      <a-scene background="color: #000000">
+      <a-scene background={sceneBackground}>
+        <a-assets>
+          <img id="vfb-thumb" src={VFB} alt="vfb thumbnail" />
+          <img
+            id="auditory_cortex-thumb"
+            src={AuditoryCortex}
+            alt="auditory cortex thumbnail"
+          />
+        </a-assets>
         <a-entity
           position="0 0 0"
           camera
@@ -92,6 +106,8 @@ class Canvas extends Component {
           raycaster="objects: .collidable"
           wasd-controls
         />
+        <ShowcaseGallery position="-5 -5 -5" />
+        <LaserControls />
         <a-entity
           id="entity_canvas"
           position="-20 -20 -80"
@@ -110,12 +126,14 @@ class Canvas extends Component {
 Canvas.defaultProps = {
   threshold: 1000,
   colorMap: {},
+  sceneBackground: 'color: #ECECEC',
 };
 
 Canvas.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.object).isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
+  sceneBackground: PropTypes.string,
 };
 
 export default Canvas;
