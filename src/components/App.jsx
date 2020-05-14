@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Canvas from './3DCanvas/Canvas';
 import ErrorBoundary from './ErrorBoundary';
 import models from '../models/models';
+
 require('../utilities/GeppettoLoader');
 
 export default class App extends Component {
@@ -17,13 +18,17 @@ export default class App extends Component {
 
   render() {
     const { selectedModel } = this.state;
-    const { colorMap } = selectedModel.props;
+    const { colorMap, sceneBackground } = selectedModel.props;
 
     return (
       <div style={{ position: 'absolute', height: '100%', width: '100%' }}>
         <ErrorBoundary>
           {this.instances ? (
-            <Canvas instances={this.instances} colorMap={colorMap} />
+            <Canvas
+              instances={this.instances}
+              colorMap={colorMap}
+              sceneBackground={sceneBackground}
+            />
           ) : (
             ''
           )}

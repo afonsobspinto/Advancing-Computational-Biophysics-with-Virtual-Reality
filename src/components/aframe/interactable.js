@@ -1,37 +1,29 @@
 AFRAME.registerComponent('interactable', {
   init: function () {
     const { el } = this;
-    const threeDObject = el.getObject3D('mesh');
 
     el.addEventListener('mouseenter', function () {
-      AFRAME.log('mouseenter');
-      threeDObject.material.color.setHex('0x0000ff');
+      console.log('mouseenter');
     });
 
     el.addEventListener('mouseleave', function () {
-      AFRAME.log('mouseleave');
-      threeDObject.material.color.setHex('0x00ff00');
+      console.log('mouseleave');
     });
 
     el.addEventListener('gripdown', function () {
-      AFRAME.log('gripdown');
-      threeDObject.material.color.setHex('0xff0000');
+      console.log('gripdown');
     });
 
     el.addEventListener('gripup', function () {
-      AFRAME.log('gripup');
-      threeDObject.material.color.setHex('0x00ff00');
+      console.log('gripup');
     });
 
     el.addEventListener('triggerdown', function () {
-      AFRAME.log('triggerdown');
-      threeDObject.material.color.setHex('0xffa500');
+      console.log('triggerdown');
     });
 
     el.addEventListener('triggerup', function () {
-      AFRAME.log('triggerup');
-      threeDObject.material.color.setHex('0x00ff00');
+      console.log('triggerup');
     });
   },
-  tick: function (t, dt) {},
 });

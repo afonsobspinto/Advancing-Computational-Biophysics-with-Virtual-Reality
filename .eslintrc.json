@@ -33,6 +33,7 @@
     "prefer-destructuring": ["error", { "object": true, "array": false }],
     "no-plusplus": "off",
     "guard-for-in": "off",
-    "react/forbid-prop-types": "off"
+    "react/forbid-prop-types": "off",
+    "jsx-a11y/media-has-caption": "off"
   }
 }
