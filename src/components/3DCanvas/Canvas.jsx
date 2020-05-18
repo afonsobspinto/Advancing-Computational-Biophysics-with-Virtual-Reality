@@ -10,8 +10,6 @@ import 'aframe';
 import GeppettoThree from './GeppettoThree';
 import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
-import VFB from '../../../assets/showcase-gallery/vfb.png';
-import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 
 class Canvas extends Component {
   constructor(props) {
@@ -21,6 +19,7 @@ class Canvas extends Component {
     this.state = {
       threeMeshes: this.geppettoThree.getThreeMeshes(instances),
     };
+    this.canvasRef = React.createRef();
   }
 
   componentDidMount() {
@@ -60,7 +59,7 @@ class Canvas extends Component {
 
   setEntityMeshes() {
     const { threeMeshes } = this.state;
-    const canvasEntity = document.getElementById('entity_canvas');
+    const canvasEntity = this.canvasRef.current;
 
     const sceneMeshes = [];
     const keysThreeMeshes = Object.keys(threeMeshes);
@@ -97,6 +96,30 @@ class Canvas extends Component {
             src={AuditoryCortex}
             alt="auditory cortex thumbnail"
           />
+          <img
+            id="arena"
+            crossOrigin="anonymous"
+            src="https://cdn.aframe.io/link-traversal/aframeArena.png"
+            alt="auditory cortex thumbnail"
+          />
+          <img
+            id="thumbCity"
+            crossOrigin="anonymous"
+            src="https://cdn.aframe.io/link-traversal/thumbs/city.png"
+            alt="auditory cortex thumbnail"
+          />
+          <img
+            id="thumbSunrise"
+            crossOrigin="anonymous"
+            src="https://cdn.aframe.io/link-traversal/thumbs/sunrise.png"
+            alt="auditory cortex thumbnail"
+          />
+          <img
+            id="thumbMountains"
+            crossOrigin="anonymous"
+            src="https://cdn.aframe.io/link-traversal/thumbs/mountains.png"
+            alt="auditory cortex thumbnail"
+          />
         </a-assets>
         <a-entity
           position="0 0 0"
@@ -106,10 +129,10 @@ class Canvas extends Component {
           raycaster="objects: .collidable"
           wasd-controls
         />
-        <ShowcaseGallery position="-5 -5 -5" />
+        <ShowcaseGallery />
         <LaserControls />
         <a-entity
-          id="entity_canvas"
+          ref={this.canvasRef}
           position="-20 -20 -80"
           scale="0.1, 0.1 0.1"
         >
