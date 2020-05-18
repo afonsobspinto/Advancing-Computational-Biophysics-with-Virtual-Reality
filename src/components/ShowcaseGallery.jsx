@@ -9,19 +9,11 @@ class ShowcaseGallery extends Component {
     return (
       <a-entity
         id="entity_showcaseGallery"
-        position="-7 -2.5 -3"
+        position="-9 -2.5 -3"
         rotation="0 50 0"
       >
-        <a-link
-          href="sunrise.html"
-          position="0 1.5 -1.0"
-          image="#thumbSunrise"
-        />
-        <a-link
-          href="mountains.html"
-          position="3.5 1.5 -1.0"
-          image="#thumbMountains"
-        />
+        <a-link position="1.5 1.5 -3.0" image="#auditory_cortex" />
+        <a-link position="3.5 1.5 -3.0" image="#vfb" />
       </a-entity>
     );
   }
