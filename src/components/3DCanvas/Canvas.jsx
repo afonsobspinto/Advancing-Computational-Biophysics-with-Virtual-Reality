@@ -10,6 +10,8 @@ import 'aframe';
 import GeppettoThree from './GeppettoThree';
 import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
+import VFB from '../../../assets/showcase-gallery/vfb.png';
+import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 
 class Canvas extends Component {
   constructor(props) {
@@ -90,34 +92,10 @@ class Canvas extends Component {
     return (
       <a-scene background={sceneBackground}>
         <a-assets>
-          <img id="vfb-thumb" src={VFB} alt="vfb thumbnail" />
+          <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img
-            id="auditory_cortex-thumb"
+            id="auditory_cortex"
             src={AuditoryCortex}
-            alt="auditory cortex thumbnail"
-          />
-          <img
-            id="arena"
-            crossOrigin="anonymous"
-            src="https://cdn.aframe.io/link-traversal/aframeArena.png"
-            alt="auditory cortex thumbnail"
-          />
-          <img
-            id="thumbCity"
-            crossOrigin="anonymous"
-            src="https://cdn.aframe.io/link-traversal/thumbs/city.png"
-            alt="auditory cortex thumbnail"
-          />
-          <img
-            id="thumbSunrise"
-            crossOrigin="anonymous"
-            src="https://cdn.aframe.io/link-traversal/thumbs/sunrise.png"
-            alt="auditory cortex thumbnail"
-          />
-          <img
-            id="thumbMountains"
-            crossOrigin="anonymous"
-            src="https://cdn.aframe.io/link-traversal/thumbs/mountains.png"
             alt="auditory cortex thumbnail"
           />
         </a-assets>
