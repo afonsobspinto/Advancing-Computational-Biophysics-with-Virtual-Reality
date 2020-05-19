@@ -32,6 +32,7 @@ class ShowcaseGallery extends Component {
         {links.map((link) => (
           <a-link
             key={link}
+            // FIXME title not changing
             title={link.title}
             // eslint-disable-next-line no-script-url
             href="javascript:void(0)"

@@ -12,6 +12,7 @@ import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
+import '../aframe/interactable';
 
 class Canvas extends Component {
   constructor(props) {
@@ -19,9 +20,22 @@ class Canvas extends Component {
     const { threshold } = this.props;
     this.geppettoThree = new GeppettoThree(threshold);
     this.canvasRef = React.createRef();
+    this.sceneRef = React.createRef();
+    this.handleHover = this.handleHover.bind(this);
+    this.handleHoverLeave = this.handleHoverLeave.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.selectedMeshs = {};
+    this.lastHover = null;
   }
 
   componentDidMount() {
+    this.sceneRef.current.addEventListener('mesh_hover', this.handleHover);
+    this.sceneRef.current.addEventListener(
+      'mesh_hover_leave',
+      this.handleHoverLeave
+    );
+    this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
+
     const { colorMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
@@ -91,12 +105,48 @@ class Canvas extends Component {
     }
   }
 
+  handleHover(evt) {
+    const { handleHover } = this.props;
+
+    this.lastHover = evt.detail.getObject3D('mesh').material.opacity;
+    // eslint-disable-next-line no-param-reassign
+    evt.detail.getObject3D('mesh').material.opacity = 0.5;
+    handleHover(evt, false);
+  }
+
+  handleHoverLeave(evt) {
+    const { handleHoverLeave } = this.props;
+    // eslint-disable-next-line no-param-reassign
+    evt.detail.getObject3D('mesh').material.opacity = this.lastHover;
+    this.lastHover = null;
+    handleHoverLeave(evt, false);
+  }
+
+  handleClick(evt) {
+    const { handleClick } = this.props;
+    if (Object.keys(this.selectedMeshs).includes(evt.detail.id)) {
+      const color = this.selectedMeshs[evt.detail.id];
+      evt.detail
+        .getObject3D('mesh')
+        .material.color.setRGB(color.r, color.g, color.b);
+      delete this.selectedMeshs[evt.detail.id];
+      handleClick(evt, true);
+    } else {
+      const meshCopy = {
+        ...evt.detail.getObject3D('mesh').material.color,
+      };
+      this.selectedMeshs[evt.detail.id] = meshCopy;
+      evt.detail.getObject3D('mesh').material.color.setRGB(1, 1, 0);
+      handleClick(evt, false);
+    }
+  }
+
   render() {
     const { sceneBackground, model, instances } = this.props;
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
-      <a-scene background={sceneBackground}>
+      <a-scene class="scene" ref={this.sceneRef} background={sceneBackground}>
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img
@@ -122,7 +172,12 @@ class Canvas extends Component {
         >
           {Object.keys(this.threeMeshes).map((key) => (
             // eslint-disable-next-line react/no-array-index-key
-            <a-entity key={`a-entity${key}`} id={`a-entity${key}`} />
+            <a-entity
+              class="collidable"
+              key={`a-entity${key}`}
+              id={`a-entity${key}`}
+              interactable
+            />
           ))}
         </a-entity>
       </a-scene>
@@ -134,6 +189,9 @@ Canvas.defaultProps = {
   threshold: 1000,
   colorMap: {},
   sceneBackground: 'color: #ECECEC',
+  handleHover: () => {},
+  handleClick: () => {},
+  handleHoverLeave: () => {},
 };
 
 Canvas.propTypes = {
@@ -142,6 +200,9 @@ Canvas.propTypes = {
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
   sceneBackground: PropTypes.string,
+  handleHover: PropTypes.func,
+  handleClick: PropTypes.func,
+  handleHoverLeave: PropTypes.func,
 };
 
 export default Canvas;
