@@ -1,13 +1,23 @@
+function clicked(target, detail) {
+  const event = new CustomEvent('mesh_click', { detail: detail });
+  target.dispatchEvent(event);
+}
+
 AFRAME.registerComponent('interactable', {
   init: function () {
     const { el } = this;
+    // TODO: Manage multiple instances
+    const scenes = document.getElementsByClassName('scene');
+    this.scene = scenes[0];
 
-    el.addEventListener('mouseenter', function () {
-      console.log('mouseenter');
+    el.addEventListener('mouseenter', () => {
+      const event = new CustomEvent('mesh_hover', { detail: el });
+      this.scene.dispatchEvent(event);
     });
 
-    el.addEventListener('mouseleave', function () {
-      console.log('mouseleave');
+    el.addEventListener('mouseleave', () => {
+      const event = new CustomEvent('mesh_hover_leave', { detail: el });
+      this.scene.dispatchEvent(event);
     });
 
     el.addEventListener('gripdown', function () {
@@ -19,7 +29,11 @@ AFRAME.registerComponent('interactable', {
     });
 
     el.addEventListener('triggerdown', function () {
-      console.log('triggerdown');
+      clicked(this.scene, el);
+    });
+
+    el.addEventListener('click', () => {
+      clicked(this.scene, el);
     });
 
     el.addEventListener('triggerup', function () {
