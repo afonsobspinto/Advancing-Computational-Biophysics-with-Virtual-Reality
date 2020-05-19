@@ -1,5 +1,8 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable eqeqeq */
+
+require('./OBJLoader');
+
 export default class GeppettoThree {
   constructor(threshold = 2000) {
     this.threshold = threshold;
@@ -294,6 +297,14 @@ export default class GeppettoThree {
         }
         this.complexity++;
         break;
+      case GEPPETTO.Resources.COLLADA:
+        threeObject = this.loadColladaModelFromNode(node);
+        this.complexity++;
+        break;
+      case GEPPETTO.Resources.OBJ:
+        threeObject = this.loadThreeOBJModelFromNode(node);
+        this.complexity++;
+        break;
 
       // TODO: Add collada and OBJ loaders
     }
@@ -441,6 +452,60 @@ export default class GeppettoThree {
     );
 
     return threeObject;
+  }
+
+  loadColladaModelFromNode(node) {
+    const loader = new THREE.ColladaLoader();
+    loader.options.convertUpAxis = true;
+    let scene = null;
+    const that = this;
+    loader.parse(node.collada, function (collada) {
+      // eslint-disable-next-line prefer-destructuring
+      scene = collada.scene;
+      scene.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+          child.material.defaultColor = GEPPETTO.Resources.COLORS.DEFAULT;
+          child.material.defaultOpacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+          child.material.wireframe = that.wireframe;
+          child.material.opacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+          child.geometry.computeVertexNormals();
+        }
+        if (child instanceof THREE.SkinnedMesh) {
+          child.material.skinning = true;
+          child.material.defaultColor = GEPPETTO.Resources.COLORS.DEFAULT;
+          child.material.defaultOpacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+          child.material.wireframe = that.wireframe;
+          child.material.opacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+          child.geometry.computeVertexNormals();
+        }
+      });
+    });
+    return scene;
+  }
+
+  loadThreeOBJModelFromNode(node) {
+    const manager = new THREE.LoadingManager();
+    manager.onProgress = function (item, loaded, total) {
+      console.log(item, loaded, total);
+    };
+    const loader = new THREE.OBJLoader(manager);
+    const scene = loader.parse(node.obj);
+    const that = this;
+    scene.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        that.setThreeColor(
+          child.material.color,
+          GEPPETTO.Resources.COLORS.DEFAULT
+        );
+        child.material.wireframe = that.wireframe;
+        child.material.defaultColor = GEPPETTO.Resources.COLORS.DEFAULT;
+        child.material.defaultOpacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+        child.material.opacity = GEPPETTO.Resources.OPACITY.DEFAULT;
+        child.geometry.computeVertexNormals();
+      }
+    });
+
+    return scene;
   }
 
   setColor(instancePath, color) {

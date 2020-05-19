@@ -16,14 +16,22 @@ import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    const { threshold, instances } = this.props;
+    const { threshold } = this.props;
     this.geppettoThree = new GeppettoThree(threshold);
-    this.state = {
-      threeMeshes: this.geppettoThree.getThreeMeshes(instances),
-    };
+    this.canvasRef = React.createRef();
   }
 
   componentDidMount() {
+    const { colorMap } = this.props;
+    if (colorMap !== {}) {
+      for (const path in colorMap) {
+        this.setColor(path, colorMap[path]);
+      }
+    }
+    this.setEntityMeshes();
+  }
+
+  componentDidUpdate() {
     const { colorMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
@@ -59,11 +67,10 @@ class Canvas extends Component {
   }
 
   setEntityMeshes() {
-    const { threeMeshes } = this.state;
-    const canvasEntity = document.getElementById('entity_canvas');
+    const canvasEntity = this.canvasRef.current;
 
     const sceneMeshes = [];
-    const keysThreeMeshes = Object.keys(threeMeshes);
+    const keysThreeMeshes = Object.keys(this.threeMeshes);
     for (let i = 0; i < canvasEntity.children.length; i++) {
       const element = canvasEntity.children[i];
       if (element.id.startsWith('a-entity')) {
@@ -78,22 +85,22 @@ class Canvas extends Component {
     let i = 0;
     for (const meshKey of keysThreeMeshes) {
       const entity = sceneMeshes[i];
-      const mesh = threeMeshes[meshKey];
+      const mesh = this.threeMeshes[meshKey];
       entity.setObject3D('mesh', mesh);
       i++;
     }
   }
 
   render() {
-    const { threeMeshes } = this.state;
-    const { sceneBackground } = this.props;
+    const { sceneBackground, model, instances } = this.props;
+    this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
       <a-scene background={sceneBackground}>
         <a-assets>
-          <img id="vfb-thumb" src={VFB} alt="vfb thumbnail" />
+          <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img
-            id="auditory_cortex-thumb"
+            id="auditory_cortex"
             src={AuditoryCortex}
             alt="auditory cortex thumbnail"
           />
@@ -106,14 +113,14 @@ class Canvas extends Component {
           raycaster="objects: .collidable"
           wasd-controls
         />
-        <ShowcaseGallery position="-5 -5 -5" />
+        <ShowcaseGallery model={model} />
         <LaserControls />
         <a-entity
-          id="entity_canvas"
+          ref={this.canvasRef}
           position="-20 -20 -80"
           scale="0.1, 0.1 0.1"
         >
-          {Object.keys(threeMeshes).map((key) => (
+          {Object.keys(this.threeMeshes).map((key) => (
             // eslint-disable-next-line react/no-array-index-key
             <a-entity key={`a-entity${key}`} id={`a-entity${key}`} />
           ))}
@@ -131,6 +138,7 @@ Canvas.defaultProps = {
 
 Canvas.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.object).isRequired,
+  model: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
   sceneBackground: PropTypes.string,
