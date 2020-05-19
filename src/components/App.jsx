@@ -13,7 +13,34 @@ export default class App extends Component {
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);
-    this.instances = [Instances.getInstance('acnet2')];
+    this.instances = [];
+    selectedModel.instances.forEach((instance) =>
+      this.instances.push(Instances.getInstance(instance))
+    );
+    this.handleModel = this.handleModel.bind(this);
+    this.canvasRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this.canvasRef.current.addEventListener('model_changed', this.handleModel);
+  }
+
+  handleModel(evt) {
+    for (const model of models) {
+      if (model.name === evt.detail) {
+        GEPPETTO.Manager.loadModel(model.model);
+        this.instances = [];
+        model.instances.forEach((instance) =>
+          this.instances.push(Instances.getInstance(instance))
+        );
+        this.setState({
+          selectedModel: model,
+        });
+      }
+    }
+    // this.setState(() => {
+    //   return { selectedModel: models[x] };
+    // });
   }
 
   render() {
@@ -21,10 +48,15 @@ export default class App extends Component {
     const { colorMap, sceneBackground } = selectedModel.props;
 
     return (
-      <div style={{ position: 'absolute', height: '100%', width: '100%' }}>
+      <div
+        ref={this.canvasRef}
+        className="CanvasContainer"
+        style={{ position: 'absolute', height: '100%', width: '100%' }}
+      >
         <ErrorBoundary>
           {this.instances ? (
             <Canvas
+              model={selectedModel.name}
               instances={this.instances}
               colorMap={colorMap}
               sceneBackground={sceneBackground}
