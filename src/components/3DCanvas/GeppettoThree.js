@@ -454,6 +454,7 @@ export default class GeppettoThree {
     return threeObject;
   }
 
+  // TODO: test
   loadColladaModelFromNode(node) {
     const loader = new THREE.ColladaLoader();
     loader.options.convertUpAxis = true;
