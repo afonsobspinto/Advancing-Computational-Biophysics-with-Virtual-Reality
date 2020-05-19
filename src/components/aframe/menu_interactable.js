@@ -27,12 +27,10 @@ AFRAME.registerComponent('menu_interactable', {
     });
 
     el.addEventListener('triggerdown', () => {
-      console.log('triggerdown');
       clicked(this.canvasContainer, el.title);
     });
 
     el.addEventListener('click', () => {
-      console.log('click');
       clicked(this.canvasContainer, el.title);
     });
 

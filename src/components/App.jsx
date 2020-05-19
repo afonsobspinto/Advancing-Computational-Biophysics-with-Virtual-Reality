@@ -18,6 +18,8 @@ export default class App extends Component {
       this.instances.push(Instances.getInstance(instance))
     );
     this.handleModel = this.handleModel.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.handleHover = this.handleHover.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -38,9 +40,14 @@ export default class App extends Component {
         });
       }
     }
-    // this.setState(() => {
-    //   return { selectedModel: models[x] };
-    // });
+  }
+
+  handleClick(evt, isSelected) {
+    console.log('App Handle Click');
+  }
+
+  handleHover(evt) {
+    console.log('App Handle Hover');
   }
 
   render() {
@@ -60,6 +67,8 @@ export default class App extends Component {
               instances={this.instances}
               colorMap={colorMap}
               sceneBackground={sceneBackground}
+              handleClick={this.handleClick}
+              handleHover={this.handleHover}
             />
           ) : (
             ''
