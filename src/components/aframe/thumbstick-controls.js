@@ -1,4 +1,7 @@
 AFRAME.registerComponent('thumbstick-controls', {
+  schema: {
+    id: { type: 'string' },
+  },
   init: function () {
     const { el } = this;
 
