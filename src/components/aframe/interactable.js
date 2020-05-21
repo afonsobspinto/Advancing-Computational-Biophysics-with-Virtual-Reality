@@ -10,7 +10,6 @@ AFRAME.registerComponent('interactable', {
   init: function () {
     const { el } = this;
     const { id } = this.data;
-    // TODO: Manage multiple instances
     this.scene = document.getElementById(id);
 
     el.addEventListener('mouseenter', () => {
@@ -27,20 +26,12 @@ AFRAME.registerComponent('interactable', {
       console.log('gripdown');
     });
 
-    el.addEventListener('gripup', () => {
-      console.log('gripup');
-    });
-
     el.addEventListener('triggerdown', () => {
       clicked(this.scene, el);
     });
 
     el.addEventListener('click', () => {
       clicked(this.scene, el);
-    });
-
-    el.addEventListener('triggerup', () => {
-      console.log('triggerup');
     });
   },
 });

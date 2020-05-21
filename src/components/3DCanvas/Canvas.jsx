@@ -168,6 +168,7 @@ class Canvas extends Component {
   render() {
     const { sceneBackground, model, instances, id } = this.props;
     const sceneID = `${id}_scene`;
+    const cameraID = `${id}_camera`;
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
@@ -181,6 +182,7 @@ class Canvas extends Component {
           />
         </a-assets>
         <a-entity
+          id={cameraID}
           position="0 1.6 0"
           camera
           look-controls
@@ -190,7 +192,7 @@ class Canvas extends Component {
           raycaster="objects: .collidable"
         />
         <ShowcaseGallery model={model} />
-        <LaserControls />
+        <LaserControls id={id} cameraID={cameraID} />
         <a-entity
           ref={this.canvasRef}
           position="-20 -20 -80"
@@ -200,8 +202,8 @@ class Canvas extends Component {
             // eslint-disable-next-line react/no-array-index-key
             <a-entity
               class="collidable"
-              key={`a-entity${key}`}
-              id={`a-entity${key}`}
+              key={`a-entity${key}_${sceneID}`}
+              id={`a-entity${key}_${sceneID}`}
               interactable={`id: ${sceneID}`}
             />
           ))}
