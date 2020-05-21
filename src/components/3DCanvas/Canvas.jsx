@@ -28,7 +28,7 @@ class Canvas extends Component {
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.selectedMeshs = {};
-    this.lastHover = null;
+    this.lastHover = {};
   }
 
   componentDidMount() {
@@ -100,7 +100,7 @@ class Canvas extends Component {
 
   handleHover(evt) {
     const { handleHover } = this.props;
-    this.lastHover = {
+    this.lastHover[evt.detail.id] = {
       ...evt.detail.getObject3D('mesh').material.color,
     };
     evt.detail
@@ -111,14 +111,14 @@ class Canvas extends Component {
 
   handleHoverLeave(evt) {
     const { handleHoverLeave } = this.props;
-    evt.detail
-      .getObject3D('mesh')
-      .material.color.setRGB(
-        this.lastHover.r,
-        this.lastHover.g,
-        this.lastHover.b
-      );
-    this.lastHover = null;
+    if (Object.keys(this.lastHover).includes(evt.detail.id)) {
+      const color = this.lastHover[evt.detail.id];
+      evt.detail
+        .getObject3D('mesh')
+        .material.color.setRGB(color.r, color.g, color.b);
+
+      delete this.lastHover[evt.detail.id];
+    }
     handleHoverLeave(evt, false);
   }
 
