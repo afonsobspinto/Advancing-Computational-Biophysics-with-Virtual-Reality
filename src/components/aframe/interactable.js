@@ -4,11 +4,14 @@ function clicked(target, detail) {
 }
 
 AFRAME.registerComponent('interactable', {
+  schema: {
+    id: { type: 'string' },
+  },
   init: function () {
     const { el } = this;
+    const { id } = this.data;
     // TODO: Manage multiple instances
-    const scenes = document.getElementsByClassName('scene');
-    this.scene = scenes[0];
+    this.scene = document.getElementById(id);
 
     el.addEventListener('mouseenter', () => {
       const event = new CustomEvent('mesh_hover', { detail: el });
@@ -20,15 +23,15 @@ AFRAME.registerComponent('interactable', {
       this.scene.dispatchEvent(event);
     });
 
-    el.addEventListener('gripdown', function () {
+    el.addEventListener('gripdown', () => {
       console.log('gripdown');
     });
 
-    el.addEventListener('gripup', function () {
+    el.addEventListener('gripup', () => {
       console.log('gripup');
     });
 
-    el.addEventListener('triggerdown', function () {
+    el.addEventListener('triggerdown', () => {
       clicked(this.scene, el);
     });
 
@@ -36,7 +39,7 @@ AFRAME.registerComponent('interactable', {
       clicked(this.scene, el);
     });
 
-    el.addEventListener('triggerup', function () {
+    el.addEventListener('triggerup', () => {
       console.log('triggerup');
     });
   },

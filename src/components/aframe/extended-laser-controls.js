@@ -9,20 +9,24 @@ AFRAME.registerComponent('extended-laser-controls', {
     const { el } = this;
     const { raycaster } = this.el.components;
 
-    el.addEventListener('gripdown', function () {
+    el.addEventListener('gripdown', () => {
       emitEvent('gripdown', raycaster);
     });
 
-    el.addEventListener('gripup', function () {
+    el.addEventListener('gripup', () => {
       emitEvent('gripup', raycaster);
     });
 
-    el.addEventListener('triggerdown', function () {
+    el.addEventListener('triggerdown', () => {
       emitEvent('triggerdown', raycaster);
     });
 
-    el.addEventListener('triggerup', function () {
+    el.addEventListener('triggerup', () => {
       emitEvent('triggerup', raycaster);
+    });
+
+    el.addEventListener('thumbstickmoved', () => {
+      emitEvent('thumbstickmoved', raycaster);
     });
   },
 });

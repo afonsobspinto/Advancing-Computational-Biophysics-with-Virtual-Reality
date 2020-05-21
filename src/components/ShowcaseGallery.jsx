@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import 'aframe';
 import 'aframe-template-component';
 import 'aframe-layout-component';
-import './aframe/menu_interactable';
+import './aframe/menu-interactable';
 import models from '../models/models';
 
 class ShowcaseGallery extends Component {
@@ -39,7 +39,7 @@ class ShowcaseGallery extends Component {
             class="collidable"
             position={link.position}
             image={link.image}
-            menu_interactable
+            menu-interactable
           />
         ))}
       </a-entity>

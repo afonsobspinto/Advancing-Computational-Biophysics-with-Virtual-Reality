@@ -42,13 +42,9 @@ export default class App extends Component {
     }
   }
 
-  handleClick(evt, isSelected) {
-    console.log('App Handle Click');
-  }
+  handleClick(evt, isSelected) {}
 
-  handleHover(evt) {
-    console.log('App Handle Hover');
-  }
+  handleHover(evt) {}
 
   render() {
     const { selectedModel } = this.state;
@@ -57,12 +53,13 @@ export default class App extends Component {
     return (
       <div
         ref={this.canvasRef}
-        className="CanvasContainer"
+        id="CanvasContainer"
         style={{ position: 'absolute', height: '100%', width: '100%' }}
       >
         <ErrorBoundary>
           {this.instances ? (
             <Canvas
+              id="canvas1"
               model={selectedModel.name}
               instances={this.instances}
               colorMap={colorMap}
