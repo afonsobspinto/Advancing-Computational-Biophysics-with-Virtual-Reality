@@ -45,16 +45,6 @@ class Canvas extends Component {
     this.setEntityMeshes();
   }
 
-  componentDidUpdate() {
-    const { colorMap } = this.props;
-    if (colorMap !== {}) {
-      for (const path in colorMap) {
-        this.setColor(path, colorMap[path]);
-      }
-    }
-    this.setEntityMeshes();
-  }
-
   setColor(path, color) {
     // eslint-disable-next-line no-eval
     const entity = eval(path);
@@ -107,17 +97,22 @@ class Canvas extends Component {
 
   handleHover(evt) {
     const { handleHover } = this.props;
-
-    this.lastHover = evt.detail.getObject3D('mesh').material.opacity;
-    // eslint-disable-next-line no-param-reassign
-    evt.detail.getObject3D('mesh').material.opacity = 0.5;
+    this.lastHover = {
+      ...evt.detail.getObject3D('mesh').material.color,
+    };
+    evt.detail.getObject3D('mesh').material.color.setRGB(0.67, 0.84, 0.9);
     handleHover(evt, false);
   }
 
   handleHoverLeave(evt) {
     const { handleHoverLeave } = this.props;
-    // eslint-disable-next-line no-param-reassign
-    evt.detail.getObject3D('mesh').material.opacity = this.lastHover;
+    evt.detail
+      .getObject3D('mesh')
+      .material.color.setRGB(
+        this.lastHover.r,
+        this.lastHover.g,
+        this.lastHover.b
+      );
     this.lastHover = null;
     handleHoverLeave(evt, false);
   }
