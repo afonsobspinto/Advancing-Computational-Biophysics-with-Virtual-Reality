@@ -13,6 +13,7 @@ import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
+import 'aframe-extras';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -27,8 +28,8 @@ class Canvas extends Component {
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.selectedMeshs = {};
-    this.lastHover = {};
+    this.selectedMeshes = {};
+    this.hoveredMeshes = {};
   }
 
   componentDidMount() {
@@ -100,7 +101,10 @@ class Canvas extends Component {
 
   handleHover(evt) {
     const { handleHover } = this.props;
-    this.lastHover[evt.detail.id] = {
+    if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
+      return;
+    }
+    this.hoveredMeshes[evt.detail.id] = {
       ...evt.detail.getObject3D('mesh').material.color,
     };
     evt.detail
@@ -111,30 +115,30 @@ class Canvas extends Component {
 
   handleHoverLeave(evt) {
     const { handleHoverLeave } = this.props;
-    if (Object.keys(this.lastHover).includes(evt.detail.id)) {
-      const color = this.lastHover[evt.detail.id];
+    if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
+      const color = this.hoveredMeshes[evt.detail.id];
       evt.detail
         .getObject3D('mesh')
         .material.color.setRGB(color.r, color.g, color.b);
 
-      delete this.lastHover[evt.detail.id];
+      delete this.hoveredMeshes[evt.detail.id];
     }
     handleHoverLeave(evt, false);
   }
 
   handleClick(evt) {
     const { handleClick } = this.props;
-    if (Object.keys(this.selectedMeshs).includes(evt.detail.id)) {
-      const color = this.selectedMeshs[evt.detail.id];
+    if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
+      const color = this.selectedMeshes[evt.detail.id];
       evt.detail.getObject3D('mesh').material.color.set(color);
-      delete this.selectedMeshs[evt.detail.id];
-      this.lastHover = {
+      delete this.selectedMeshes[evt.detail.id];
+      this.hoveredMeshes = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
       handleClick(evt, true);
     } else {
       const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
-      this.selectedMeshs[evt.detail.id] = meshCopy;
+      this.selectedMeshes[evt.detail.id] = meshCopy;
 
       evt.detail
         .getObject3D('mesh')
@@ -144,7 +148,7 @@ class Canvas extends Component {
           SELECTED_COLOR.b
         );
 
-      this.lastHover = {
+      this.hoveredMeshes = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
       handleClick(evt, false);
@@ -165,14 +169,9 @@ class Canvas extends Component {
             alt="auditory cortex thumbnail"
           />
         </a-assets>
-        <a-entity
-          position="0 0 0"
-          camera
-          look-controls
-          cursor="rayOrigin: mouse"
-          raycaster="objects: .collidable"
-          wasd-controls
-        />
+        <a-entity id="rig" movement-controls position="0 0 0">
+          <a-entity position="0 1.6 0" camera look-controls />
+        </a-entity>
         <ShowcaseGallery model={model} />
         <LaserControls />
         <a-entity
