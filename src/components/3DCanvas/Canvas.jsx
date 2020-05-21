@@ -13,7 +13,7 @@ import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
-import 'aframe-extras';
+import '../aframe/thumbstick-controls';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -40,6 +40,16 @@ class Canvas extends Component {
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
 
+    const { colorMap } = this.props;
+    if (colorMap !== {}) {
+      for (const path in colorMap) {
+        this.setColor(path, colorMap[path]);
+      }
+    }
+    this.setEntityMeshes();
+  }
+
+  componentDidUpdate() {
     const { colorMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
@@ -156,11 +166,12 @@ class Canvas extends Component {
   }
 
   render() {
-    const { sceneBackground, model, instances } = this.props;
+    const { sceneBackground, model, instances, id } = this.props;
+    const sceneID = `${id}_scene`;
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
-      <a-scene class="scene" ref={this.sceneRef} background={sceneBackground}>
+      <a-scene id={sceneID} ref={this.sceneRef} background={sceneBackground}>
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img
@@ -169,9 +180,15 @@ class Canvas extends Component {
             alt="auditory cortex thumbnail"
           />
         </a-assets>
-        <a-entity id="rig" movement-controls position="0 0 0">
-          <a-entity position="0 1.6 0" camera look-controls />
-        </a-entity>
+        <a-entity
+          position="0 1.6 0"
+          camera
+          look-controls
+          wasd-controls
+          thumbstick-controls
+          cursor="rayOrigin: mouse"
+          raycaster="objects: .collidable"
+        />
         <ShowcaseGallery model={model} />
         <LaserControls />
         <a-entity
@@ -185,7 +202,7 @@ class Canvas extends Component {
               class="collidable"
               key={`a-entity${key}`}
               id={`a-entity${key}`}
-              interactable
+              interactable={`id: ${sceneID}`}
             />
           ))}
         </a-entity>
@@ -206,6 +223,7 @@ Canvas.defaultProps = {
 Canvas.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.object).isRequired,
   model: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
   sceneBackground: PropTypes.string,
