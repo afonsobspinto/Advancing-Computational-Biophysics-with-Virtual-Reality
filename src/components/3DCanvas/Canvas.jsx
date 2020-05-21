@@ -14,6 +14,9 @@ import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
 
+const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
+const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
+
 class Canvas extends Component {
   constructor(props) {
     super(props);
@@ -100,7 +103,9 @@ class Canvas extends Component {
     this.lastHover = {
       ...evt.detail.getObject3D('mesh').material.color,
     };
-    evt.detail.getObject3D('mesh').material.color.setRGB(0.67, 0.84, 0.9);
+    evt.detail
+      .getObject3D('mesh')
+      .material.color.setRGB(HOVER_COLOR.r, HOVER_COLOR.g, HOVER_COLOR.b);
     handleHover(evt, false);
   }
 
@@ -121,17 +126,27 @@ class Canvas extends Component {
     const { handleClick } = this.props;
     if (Object.keys(this.selectedMeshs).includes(evt.detail.id)) {
       const color = this.selectedMeshs[evt.detail.id];
-      evt.detail
-        .getObject3D('mesh')
-        .material.color.setRGB(color.r, color.g, color.b);
+      evt.detail.getObject3D('mesh').material.color.set(color);
       delete this.selectedMeshs[evt.detail.id];
-      handleClick(evt, true);
-    } else {
-      const meshCopy = {
+      this.lastHover = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
+      handleClick(evt, true);
+    } else {
+      const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
       this.selectedMeshs[evt.detail.id] = meshCopy;
-      evt.detail.getObject3D('mesh').material.color.setRGB(1, 1, 0);
+
+      evt.detail
+        .getObject3D('mesh')
+        .material.color.setRGB(
+          SELECTED_COLOR.r,
+          SELECTED_COLOR.g,
+          SELECTED_COLOR.b
+        );
+
+      this.lastHover = {
+        ...evt.detail.getObject3D('mesh').material.color,
+      };
       handleClick(evt, false);
     }
   }
