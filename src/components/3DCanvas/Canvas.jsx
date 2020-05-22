@@ -181,16 +181,14 @@ class Canvas extends Component {
             alt="auditory cortex thumbnail"
           />
         </a-assets>
-        <a-entity
-          id={cameraID}
-          position="0 1.6 0"
-          camera
-          look-controls
-          wasd-controls
-          thumbstick-controls
-          cursor="rayOrigin: mouse"
-          raycaster="objects: .collidable"
-        />
+
+        <a-entity id={cameraID} position="0 1.6 0" thumbstick-controls>
+          <a-camera
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .collidable"
+          />
+        </a-entity>
+
         <ShowcaseGallery model={model} />
         <LaserControls id={id} cameraID={cameraID} />
         <a-entity
