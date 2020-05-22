@@ -165,6 +165,7 @@ class Canvas extends Component {
     }
   }
 
+  //TODO: Extend look controls and add fly
   render() {
     const { sceneBackground, model, instances, id } = this.props;
     const sceneID = `${id}_scene`;
