@@ -190,10 +190,10 @@ class Canvas extends Component {
             cursor="rayOrigin: mouse"
             raycaster="objects: .collidable"
           />
+          <LaserControls id={id} />
         </a-entity>
 
         <ShowcaseGallery model={model} />
-        <LaserControls id={id} />
         <a-entity
           ref={this.canvasRef}
           position="-20 -20 -80"
