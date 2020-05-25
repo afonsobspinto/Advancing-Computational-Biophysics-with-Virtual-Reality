@@ -191,9 +191,9 @@ class Canvas extends Component {
             raycaster="objects: .collidable"
           />
           <LaserControls id={id} />
+          <ShowcaseGallery model={model} />
         </a-entity>
 
-        <ShowcaseGallery model={model} />
         <a-entity
           ref={this.canvasRef}
           position="-20 -20 -80"

@@ -23,7 +23,7 @@ AFRAME.registerComponent('rotatable', {
       this.isRotating = false;
     });
   },
-  // TODO: Add reset button
+
   tick: function (time, delta) {
     const { el } = this;
     const { revesed } = this.data;
@@ -43,7 +43,7 @@ AFRAME.registerComponent('rotatable', {
       }
       el.object3D.rotation.x = this.baseRotation.x + rotate.x;
       el.object3D.rotation.y = this.baseRotation.y + rotate.y;
-      el.object3D.rotation.z = this.baseRotation.z + rotate.z;
+      //el.object3D.rotation.z = this.baseRotation.z + rotate.z;
       this.previousHandRotation = { ...this.rhand.object3D.rotation };
     }
   },
