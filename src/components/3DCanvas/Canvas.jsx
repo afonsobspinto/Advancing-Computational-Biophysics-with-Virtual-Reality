@@ -13,6 +13,7 @@ import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
+import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
@@ -165,10 +166,12 @@ class Canvas extends Component {
     }
   }
 
+  // TODO: Extend look controls and add fly
   render() {
     const { sceneBackground, model, instances, id } = this.props;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
+    const modelID = `${id}_model`;
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
@@ -181,30 +184,30 @@ class Canvas extends Component {
             alt="auditory cortex thumbnail"
           />
         </a-assets>
-        <a-entity
-          id={cameraID}
-          position="0 1.6 0"
-          camera
-          look-controls
-          wasd-controls
-          thumbstick-controls
-          cursor="rayOrigin: mouse"
-          raycaster="objects: .collidable"
-        />
-        <ShowcaseGallery model={model} />
-        <LaserControls id={id} cameraID={cameraID} />
+
+        <a-entity id={cameraID} position="0 1.6 0" thumbstick-controls>
+          <a-camera
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .collidable"
+          />
+          <LaserControls id={id} />
+          <ShowcaseGallery model={model} />
+        </a-entity>
+
         <a-entity
           ref={this.canvasRef}
           position="-20 -20 -80"
           scale="0.1, 0.1 0.1"
+          id={modelID}
+          rotatable={`id: ${id}`}
         >
           {Object.keys(this.threeMeshes).map((key) => (
             // eslint-disable-next-line react/no-array-index-key
             <a-entity
               class="collidable"
-              key={`a-entity${key}_${sceneID}`}
-              id={`a-entity${key}_${sceneID}`}
-              interactable={`id: ${sceneID}`}
+              key={`a-entity${key}_${id}`}
+              id={`a-entity${key}_${id}`}
+              interactable={`id: ${id}`}
             />
           ))}
         </a-entity>

@@ -10,7 +10,7 @@ AFRAME.registerComponent('interactable', {
   init: function () {
     const { el } = this;
     const { id } = this.data;
-    this.scene = document.getElementById(id);
+    this.scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('mouseenter', () => {
       const event = new CustomEvent('mesh_hover', { detail: el });
@@ -20,10 +20,6 @@ AFRAME.registerComponent('interactable', {
     el.addEventListener('mouseleave', () => {
       const event = new CustomEvent('mesh_hover_leave', { detail: el });
       this.scene.dispatchEvent(event);
-    });
-
-    el.addEventListener('gripdown', () => {
-      console.log('gripdown');
     });
 
     el.addEventListener('triggerdown', () => {
