@@ -13,6 +13,7 @@ import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
+import '../aframe/thumbstick-controls';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -27,8 +28,8 @@ class Canvas extends Component {
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.selectedMeshs = {};
-    this.lastHover = null;
+    this.selectedMeshes = {};
+    this.hoveredMeshes = {};
   }
 
   componentDidMount() {
@@ -39,6 +40,16 @@ class Canvas extends Component {
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
 
+    const { colorMap } = this.props;
+    if (colorMap !== {}) {
+      for (const path in colorMap) {
+        this.setColor(path, colorMap[path]);
+      }
+    }
+    this.setEntityMeshes();
+  }
+
+  componentDidUpdate() {
     const { colorMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
@@ -100,7 +111,10 @@ class Canvas extends Component {
 
   handleHover(evt) {
     const { handleHover } = this.props;
-    this.lastHover = {
+    if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
+      return;
+    }
+    this.hoveredMeshes[evt.detail.id] = {
       ...evt.detail.getObject3D('mesh').material.color,
     };
     evt.detail
@@ -111,30 +125,30 @@ class Canvas extends Component {
 
   handleHoverLeave(evt) {
     const { handleHoverLeave } = this.props;
-    evt.detail
-      .getObject3D('mesh')
-      .material.color.setRGB(
-        this.lastHover.r,
-        this.lastHover.g,
-        this.lastHover.b
-      );
-    this.lastHover = null;
+    if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
+      const color = this.hoveredMeshes[evt.detail.id];
+      evt.detail
+        .getObject3D('mesh')
+        .material.color.setRGB(color.r, color.g, color.b);
+
+      delete this.hoveredMeshes[evt.detail.id];
+    }
     handleHoverLeave(evt, false);
   }
 
   handleClick(evt) {
     const { handleClick } = this.props;
-    if (Object.keys(this.selectedMeshs).includes(evt.detail.id)) {
-      const color = this.selectedMeshs[evt.detail.id];
+    if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
+      const color = this.selectedMeshes[evt.detail.id];
       evt.detail.getObject3D('mesh').material.color.set(color);
-      delete this.selectedMeshs[evt.detail.id];
-      this.lastHover = {
+      delete this.selectedMeshes[evt.detail.id];
+      this.hoveredMeshes = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
       handleClick(evt, true);
     } else {
       const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
-      this.selectedMeshs[evt.detail.id] = meshCopy;
+      this.selectedMeshes[evt.detail.id] = meshCopy;
 
       evt.detail
         .getObject3D('mesh')
@@ -144,7 +158,7 @@ class Canvas extends Component {
           SELECTED_COLOR.b
         );
 
-      this.lastHover = {
+      this.hoveredMeshes = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
       handleClick(evt, false);
@@ -152,11 +166,13 @@ class Canvas extends Component {
   }
 
   render() {
-    const { sceneBackground, model, instances } = this.props;
+    const { sceneBackground, model, instances, id } = this.props;
+    const sceneID = `${id}_scene`;
+    const cameraID = `${id}_camera`;
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
-      <a-scene class="scene" ref={this.sceneRef} background={sceneBackground}>
+      <a-scene id={sceneID} ref={this.sceneRef} background={sceneBackground}>
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img
@@ -166,15 +182,17 @@ class Canvas extends Component {
           />
         </a-assets>
         <a-entity
-          position="0 0 0"
+          id={cameraID}
+          position="0 1.6 0"
           camera
           look-controls
+          wasd-controls
+          thumbstick-controls
           cursor="rayOrigin: mouse"
           raycaster="objects: .collidable"
-          wasd-controls
         />
         <ShowcaseGallery model={model} />
-        <LaserControls />
+        <LaserControls id={id} cameraID={cameraID} />
         <a-entity
           ref={this.canvasRef}
           position="-20 -20 -80"
@@ -184,9 +202,9 @@ class Canvas extends Component {
             // eslint-disable-next-line react/no-array-index-key
             <a-entity
               class="collidable"
-              key={`a-entity${key}`}
-              id={`a-entity${key}`}
-              interactable
+              key={`a-entity${key}_${sceneID}`}
+              id={`a-entity${key}_${sceneID}`}
+              interactable={`id: ${sceneID}`}
             />
           ))}
         </a-entity>
@@ -207,6 +225,7 @@ Canvas.defaultProps = {
 Canvas.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.object).isRequired,
   model: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
   sceneBackground: PropTypes.string,

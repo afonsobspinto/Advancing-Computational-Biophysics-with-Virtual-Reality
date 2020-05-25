@@ -5,24 +5,35 @@ function emitEvent(event, raycaster) {
 }
 
 AFRAME.registerComponent('extended-laser-controls', {
+  schema: {
+    cameraID: { type: 'string' },
+  },
   init: function () {
     const { el } = this;
     const { raycaster } = this.el.components;
+    const { cameraID } = this.data;
 
-    el.addEventListener('gripdown', function () {
+    this.camera = document.getElementById(cameraID);
+
+    el.addEventListener('gripdown', () => {
       emitEvent('gripdown', raycaster);
     });
 
-    el.addEventListener('gripup', function () {
+    el.addEventListener('gripup', () => {
       emitEvent('gripup', raycaster);
     });
 
-    el.addEventListener('triggerdown', function () {
+    el.addEventListener('triggerdown', () => {
       emitEvent('triggerdown', raycaster);
     });
 
-    el.addEventListener('triggerup', function () {
+    el.addEventListener('triggerup', () => {
       emitEvent('triggerup', raycaster);
+    });
+
+    el.addEventListener('thumbstickmoved', (evt) => {
+      const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
+      this.camera.dispatchEvent(event);
     });
   },
 });
