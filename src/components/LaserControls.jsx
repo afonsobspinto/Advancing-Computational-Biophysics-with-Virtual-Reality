@@ -6,7 +6,7 @@ import './aframe/extended-laser-controls';
 
 class LaserControls extends Component {
   render() {
-    const { id, cameraID } = this.props;
+    const { id } = this.props;
     return (
       <a-entity id={`${id}_entity_hands`}>
         <a-entity
@@ -14,14 +14,14 @@ class LaserControls extends Component {
           laser-controls="hand: left"
           line="color: blue"
           raycaster="objects: .collidable"
-          extended-laser-controls={`cameraID: ${cameraID}`}
+          extended-laser-controls={`id: ${id}`}
         />
         <a-entity
           id={`${id}_rightHand`}
           laser-controls="hand: right"
           raycaster="objects: .collidable"
           line="color: blue"
-          extended-laser-controls={`cameraID: ${cameraID}`}
+          extended-laser-controls={`id: ${id}`}
         />
       </a-entity>
     );
@@ -30,7 +30,6 @@ class LaserControls extends Component {
 
 LaserControls.propTypes = {
   id: PropTypes.string.isRequired,
-  cameraID: PropTypes.string.isRequired,
 };
 
 export default LaserControls;
