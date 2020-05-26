@@ -1,5 +1,6 @@
 import auditoryCortex from './auditory_cortex.json';
 import vfb from './vfb.json';
+import ca1 from './ca1_pyramidal_cell.json';
 
 const models = [
   {
@@ -15,11 +16,34 @@ const models = [
     instances: ['acnet2'],
   },
   {
+    name: 'ca1_pyramidal_cell',
+    model: ca1,
+    props: {
+      colorMap: {
+        network_CA1PyramidalCell: '0x009295',
+      },
+    },
+    imageID: '#ca1',
+    instances: ['network_CA1PyramidalCell'],
+  },
+  {
     name: 'vfb',
     model: vfb,
     props: {},
     imageID: '#vfb',
-    instances: ['VFB_00017894'],
+    instances: [
+      'VFB_00017894',
+      'VFB_00030624',
+      'VFB_00030622',
+      'VFB_00030616',
+      'VFB_00030633',
+      'VFB_00030840',
+      'VFB_00030632',
+      'VFB_00030783',
+      'VFB_00030773',
+      'VFB_00025007',
+      // 'VFB_00101383',
+    ],
   },
 ];
 

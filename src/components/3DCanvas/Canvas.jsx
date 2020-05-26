@@ -115,13 +115,15 @@ class Canvas extends Component {
     if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
       return;
     }
-    this.hoveredMeshes[evt.detail.id] = {
-      ...evt.detail.getObject3D('mesh').material.color,
-    };
-    evt.detail
-      .getObject3D('mesh')
-      .material.color.setRGB(HOVER_COLOR.r, HOVER_COLOR.g, HOVER_COLOR.b);
-    handleHover(evt, false);
+    if (evt.detail.getObject3D('mesh').material) {
+      this.hoveredMeshes[evt.detail.id] = {
+        ...evt.detail.getObject3D('mesh').material.color,
+      };
+      evt.detail
+        .getObject3D('mesh')
+        .material.color.setRGB(HOVER_COLOR.r, HOVER_COLOR.g, HOVER_COLOR.b);
+      handleHover(evt, false);
+    }
   }
 
   handleHoverLeave(evt) {
@@ -166,7 +168,6 @@ class Canvas extends Component {
     }
   }
 
-  // TODO: Extend look controls and add fly
   render() {
     const { sceneBackground, model, instances, id } = this.props;
     const sceneID = `${id}_scene`;
@@ -189,6 +190,7 @@ class Canvas extends Component {
           <a-camera
             cursor="rayOrigin: mouse"
             raycaster="objects: .collidable"
+            acceleration="200"
           />
           <LaserControls id={id} />
           <ShowcaseGallery model={model} />

@@ -305,8 +305,6 @@ export default class GeppettoThree {
         threeObject = this.loadThreeOBJModelFromNode(node);
         this.complexity++;
         break;
-
-      // TODO: Add collada and OBJ loaders
     }
 
     if (threeObject) {
