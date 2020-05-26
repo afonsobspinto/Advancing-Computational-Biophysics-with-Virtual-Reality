@@ -29,7 +29,16 @@ const models = [
   {
     name: 'vfb',
     model: vfb,
-    props: {},
+    props: {
+      colorMap: {
+        VFB_00017894: '0x5b5b5b',
+        VFB_00030622: '0x00ff00',
+        VFB_00030616: '0xff00ff',
+        VFB_00030633: '0x0000ff',
+        VFB_00030840: '0xffd300',
+        VFB_00030632: '0x0084f6',
+      },
+    },
     imageID: '#vfb',
     instances: [
       'VFB_00017894',
