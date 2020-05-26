@@ -3,6 +3,7 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
+import particle from '../../../assets/3dparticle.png';
 var THREE = window.THREE || require('three');
 THREE.OBJLoader = function (manager) {
   this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
@@ -380,9 +381,8 @@ THREE.OBJLoader.prototype = {
     var textureLoader = new THREE.TextureLoader();
     var material = new THREE.PointsMaterial({
       size: 2,
-      map: textureLoader.load(
-        'geppetto/node_modules/@geppettoengine/geppetto-client/js/components/interface/3dCanvas/particle.png'
-      ),
+
+      map: textureLoader.load(particle),
       blending: THREE.AdditiveBlending,
       depthTest: false,
       transparent: true,
