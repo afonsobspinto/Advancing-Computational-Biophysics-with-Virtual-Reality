@@ -11,7 +11,7 @@ function isEmptyObject(keys) {
 
 AFRAME.registerComponent('thumbstick-controls', {
   schema: {
-    acceleration: { default: 5 },
+    acceleration: { default: 2 },
     adAxis: { default: 'x', oneOf: ['x', 'y', 'z'] },
     wsAxis: { default: 'z', oneOf: ['x', 'y', 'z'] },
     fly: { default: true },

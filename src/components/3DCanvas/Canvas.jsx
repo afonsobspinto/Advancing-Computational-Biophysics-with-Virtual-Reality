@@ -24,6 +24,9 @@ class Canvas extends Component {
   constructor(props) {
     super(props);
     const { threshold, instances } = this.props;
+    this.state = {
+      visualGroupss: false,
+    };
     this.geppettoThree = new GeppettoThree(threshold);
     this.geppettoThree.init(instances);
     this.canvasRef = React.createRef();
@@ -72,9 +75,12 @@ class Canvas extends Component {
 
   componentDidUpdate() {
     const { colorMap } = this.props;
-    if (colorMap !== {}) {
-      for (const path in colorMap) {
-        this.setColor(path, colorMap[path]);
+    const { visualGroups } = this.state;
+    if (!visualGroups) {
+      if (colorMap !== {}) {
+        for (const path in colorMap) {
+          this.setColor(path, colorMap[path]);
+        }
       }
     }
     this.setEntityMeshes();
@@ -198,7 +204,9 @@ class Canvas extends Component {
    */
   showVisualGroups(visualGroup, mode, instances) {
     this.geppettoThree.showVisualGroups(visualGroup, mode, instances);
-    this.forceUpdate();
+    this.setState({
+      visualGroups: true,
+    });
   }
 
   render() {
@@ -227,7 +235,7 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          <ShowcaseGallery model={model} />
+          {/* <ShowcaseGallery model={model} /> */}
         </a-entity>
 
         <a-entity
