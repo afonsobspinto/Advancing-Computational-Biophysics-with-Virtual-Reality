@@ -18,6 +18,13 @@ export default class GeppettoThree {
     return { ...this.meshes, ...this.splitMeshes };
   }
 
+  init(instances) {
+    this.meshes = {};
+    this.splitMeshes = {};
+    this.visualModelMap = {};
+    this.traverseInstances(instances);
+  }
+
   traverseInstances(instances) {
     for (let j = 0; j < instances.length; j++) {
       this.checkVisualInstance(instances[j]);

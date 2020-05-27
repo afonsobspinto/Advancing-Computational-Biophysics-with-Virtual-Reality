@@ -25,7 +25,7 @@ class Canvas extends Component {
     super(props);
     const { threshold, instances } = this.props;
     this.geppettoThree = new GeppettoThree(threshold);
-    this.geppettoThree.traverseInstances(instances);
+    this.geppettoThree.init(instances);
     this.canvasRef = React.createRef();
     this.sceneRef = React.createRef();
     this.handleHover = this.handleHover.bind(this);
@@ -60,6 +60,14 @@ class Canvas extends Component {
       }
     }
     this.setEntityMeshes();
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    const { instances } = this.props;
+    if (instances !== nextProps.instances) {
+      this.geppettoThree.init(nextProps.instances);
+    }
+    return true;
   }
 
   componentDidUpdate() {
