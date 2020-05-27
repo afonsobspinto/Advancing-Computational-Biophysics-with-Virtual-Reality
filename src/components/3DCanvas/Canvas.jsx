@@ -71,6 +71,12 @@ class Canvas extends Component {
   }
 
   componentDidUpdate() {
+    const { colorMap } = this.props;
+    if (colorMap !== {}) {
+      for (const path in colorMap) {
+        this.setColor(path, colorMap[path]);
+      }
+    }
     this.setEntityMeshes();
   }
 
