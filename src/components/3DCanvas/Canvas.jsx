@@ -11,6 +11,7 @@ import GeppettoThree from './GeppettoThree';
 import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
+import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
 import '../aframe/rotatable';
@@ -29,6 +30,8 @@ class Canvas extends Component {
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    // TODO: remove this workaround
+    this.showVisualGroups = this.showVisualGroups.bind(this);
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
   }
@@ -40,6 +43,14 @@ class Canvas extends Component {
       this.handleHoverLeave
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
+    // TODO: remove this workaround
+    this.sceneRef.current.addEventListener('visual_groups', (evt) =>
+      this.showVisualGroups(
+        evt.detail.groups,
+        evt.detail.mode,
+        evt.detail.instances
+      )
+    );
 
     const { colorMap } = this.props;
     if (colorMap !== {}) {
@@ -89,7 +100,9 @@ class Canvas extends Component {
     const canvasEntity = this.canvasRef.current;
 
     const sceneMeshes = [];
-    const keysThreeMeshes = Object.keys(this.threeMeshes);
+    const keysThreeMeshes = Object.keys(this.threeMeshes).filter(
+      (key) => this.threeMeshes[key].visible
+    );
     for (let i = 0; i < canvasEntity.children.length; i++) {
       const element = canvasEntity.children[i];
       if (element.id.startsWith('a-entity')) {
@@ -168,8 +181,19 @@ class Canvas extends Component {
     }
   }
 
+  /**
+   * Activates a visual group
+   * @param visualGroup
+   * @param mode
+   * @param instances
+   */
+  showVisualGroups(visualGroup, mode, instances) {
+    this.geppettoThree.showVisualGroups(visualGroup, mode, instances);
+    this.forceUpdate();
+  }
+
   render() {
-    const { sceneBackground, model, instances, id } = this.props;
+    const { sceneBackground, model, instances, id, position } = this.props;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
@@ -179,6 +203,7 @@ class Canvas extends Component {
       <a-scene id={sceneID} ref={this.sceneRef} background={sceneBackground}>
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
+          <img id="ca1" src={CA1} alt="ca1 thumbnail" />
           <img
             id="auditory_cortex"
             src={AuditoryCortex}
@@ -198,20 +223,22 @@ class Canvas extends Component {
 
         <a-entity
           ref={this.canvasRef}
-          position="-20 -20 -80"
+          position={position}
           scale="0.1, 0.1 0.1"
           id={modelID}
           rotatable={`id: ${id}`}
         >
-          {Object.keys(this.threeMeshes).map((key) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <a-entity
-              class="collidable"
-              key={`a-entity${key}_${id}`}
-              id={`a-entity${key}_${id}`}
-              interactable={`id: ${id}`}
-            />
-          ))}
+          {Object.keys(this.threeMeshes)
+            .filter((key) => this.threeMeshes[key].visible)
+            .map((key) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <a-entity
+                class="collidable"
+                key={`a-entity${key}_${id}`}
+                id={`a-entity${key}_${id}`}
+                interactable={`id: ${id}`}
+              />
+            ))}
         </a-entity>
       </a-scene>
     );
@@ -221,6 +248,7 @@ class Canvas extends Component {
 Canvas.defaultProps = {
   threshold: 1000,
   colorMap: {},
+  position: '-20 -20 -80',
   sceneBackground: 'color: #ECECEC',
   handleHover: () => {},
   handleClick: () => {},
@@ -233,6 +261,7 @@ Canvas.propTypes = {
   id: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
+  position: PropTypes.string,
   sceneBackground: PropTypes.string,
   handleHover: PropTypes.func,
   handleClick: PropTypes.func,

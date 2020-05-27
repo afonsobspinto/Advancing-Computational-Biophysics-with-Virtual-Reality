@@ -9,7 +9,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedModel: models[2],
+      selectedModel: models[1],
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);
@@ -48,7 +48,7 @@ export default class App extends Component {
 
   render() {
     const { selectedModel } = this.state;
-    const { colorMap, sceneBackground } = selectedModel.props;
+    const { colorMap, sceneBackground, position } = selectedModel.props;
 
     return (
       <div
@@ -63,6 +63,7 @@ export default class App extends Component {
               model={selectedModel.name}
               instances={this.instances}
               colorMap={colorMap}
+              position={position}
               sceneBackground={sceneBackground}
               handleClick={this.handleClick}
               handleHover={this.handleHover}
