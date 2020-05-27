@@ -31,7 +31,7 @@ AFRAME.registerComponent('rotatable', {
       let rotate = {
         x: this.rhand.object3D.rotation.x - this.previousHandRotation._x,
         y: this.rhand.object3D.rotation.y - this.previousHandRotation._y,
-        z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
+        // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
       };
 
       if (revesed) {

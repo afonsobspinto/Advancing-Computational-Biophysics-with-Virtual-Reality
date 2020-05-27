@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import Manager from '@geppettoengine/geppetto-client/js/common/Manager';
 import AA from '@geppettoengine/geppetto-client/js/geppettoModel/model/ArrayElementInstance';
+import { rgbToHex } from '../../geppetto-client/geppetto-core/geppetto-js/Utility';
 
 const GEPPETTO = {};
 window.GEPPETTO = GEPPETTO;
@@ -16,6 +17,7 @@ const ModelFactory = require('@geppettoengine/geppetto-client/js/geppettoModel/M
 
 GEPPETTO.Utility = {};
 GEPPETTO.Utility.extractMethodsFromObject = () => [];
+GEPPETTO.Utility.rgbToHex = (r, g, b) => rgbToHex(r, g, b);
 GEPPETTO.trigger = (evt) => console.log(evt, 'triggered');
 GEPPETTO.Manager = new Manager();
 console.warn = () => null;

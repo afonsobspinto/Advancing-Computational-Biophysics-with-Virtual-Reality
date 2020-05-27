@@ -8,13 +8,21 @@ export default class GeppettoThree {
     this.threshold = threshold;
     this.complexity = 0;
     this.meshes = {};
+    this.splitMeshes = {};
+    this.visualModelMap = {};
   }
 
-  getThreeMeshes(instances) {
-    this.meshes = {};
-    this.traverseInstances(instances);
+  getThreeMeshes() {
     // TODO: set geometry type
-    return this.meshes;
+    // TODO: Make sure this is correct:
+    return { ...this.meshes, ...this.splitMeshes };
+  }
+
+  init(instances) {
+    this.meshes = {};
+    this.splitMeshes = {};
+    this.visualModelMap = {};
+    this.traverseInstances(instances);
   }
 
   traverseInstances(instances) {
@@ -47,7 +55,6 @@ export default class GeppettoThree {
   buildVisualInstance(instance) {
     const meshes = this.generate3DObjects(instance);
     this.init3DObject(meshes, instance);
-    // Todo: add init3DObject
   }
 
   init3DObject(meshes, instance) {
@@ -72,19 +79,359 @@ export default class GeppettoThree {
       this.meshes[instancePath].input = false;
       this.meshes[instancePath].output = false;
 
-      // TODO: Add split meshes
       // Split anything that was splitted before
+      if (instancePath in this.splitMeshes) {
+        const { splitMeshes } = this;
+        const elements = {};
+        for (const splitMesh in splitMeshes) {
+          if (
+            splitMeshes[splitMesh].instancePath == instancePath &&
+            splitMesh != instancePath
+          ) {
+            const visualObject = splitMesh.substring(instancePath.length + 1);
+            elements[visualObject] = '';
+          }
+        }
+        if (Object.keys(elements).length > 0) {
+          this.splitGroups(instance, elements);
+        }
+      }
+      // TODO: Add scalculateSceneMaxRadius
     }
   }
 
+  /**
+   * Split merged mesh into individual meshes
+   *
+   * @param {String}
+   *            instancePath - Path of aspect, corresponds to original merged mesh
+   * @param {AspectSubTreeNode}
+   *            visualizationTree - Aspect Visualization Tree with groups info for visual objects
+   * @param {object}
+   *            groups - The groups that we need to split mesh into
+   */
+  splitGroups(instance, groupElements) {
+    if (!this.hasInstance(instance)) {
+      return;
+    }
+    const instancePath = instance.getInstancePath();
+
+    // retrieve the merged mesh
+    const mergedMesh = this.meshes[instancePath];
+    // create object to hold geometries used for merging objects in groups
+    const geometryGroups = {};
+
+    /*
+     * reset the aspect instance path group mesh, this is used to group visual objects that don't belong to any of the groups passed as parameter
+     */
+    this.splitMeshes[instancePath] = null;
+    geometryGroups[instancePath] = new THREE.Geometry();
+
+    // create map of geometry groups for groups
+    for (const groupElement in groupElements) {
+      const groupName = `${instancePath}.${groupElement}`;
+
+      const geometry = new THREE.Geometry();
+      geometry.groupMerge = true;
+
+      geometryGroups[groupName] = geometry;
+    }
+
+    // get map of all meshes that merged mesh was merging
+    const map = mergedMesh.mergedMeshesPaths;
+
+    /*
+     * flag for keep track what visual objects were added to group
+     * meshes already
+     */
+    let added = false;
+    /*
+     * loop through individual meshes, add them to group, set new
+     * material to them
+     */
+
+    for (const v in map) {
+      if (v != undefined) {
+        const m = this.visualModelMap[map[v]];
+
+        // eslint-disable-next-line no-eval
+        eval(map[v].substring(0, map[v].lastIndexOf('.')));
+        const object = instance.getVisualType()[
+          map[v].replace(`${instancePath}.`, '')
+        ];
+
+        // If it is a segment compare to the id otherwise check in the visual groups
+        if (object.getId() in groupElements) {
+          // true means don't add to mesh with non-groups visual objects
+          added = this.addMeshToGeometryGroup(
+            instance,
+            object.getId(),
+            geometryGroups,
+            m
+          );
+        } else {
+          // get group elements list for object
+          const groupElementsReference = object.getInitialValue().value
+            .groupElements;
+          for (let i = 0; i < groupElementsReference.length; i++) {
+            const objectGroup = GEPPETTO.ModelFactory.resolve(
+              groupElementsReference[i].$ref
+            ).getId();
+            if (objectGroup in groupElements) {
+              // true means don't add to mesh with non-groups visual objects
+              added = this.addMeshToGeometryGroup(
+                instance,
+                objectGroup,
+                geometryGroups,
+                m
+              );
+            }
+          }
+        }
+
+        /*
+         * if visual object didn't belong to group, add it to mesh
+         * with remainder of them
+         */
+        if (!added) {
+          const geometry = geometryGroups[instancePath];
+          if (m instanceof THREE.Line) {
+            geometry.vertices.push(m.geometry.vertices[0]);
+            geometry.vertices.push(m.geometry.vertices[1]);
+          } else {
+            // merged mesh into corresponding geometry
+            geometry.merge(m.geometry, m.matrix);
+          }
+        }
+        // reset flag for next visual object
+        added = false;
+      }
+    }
+
+    groupElements[instancePath] = {};
+    groupElements[instancePath].color = GEPPETTO.Resources.COLORS.SPLIT;
+    this.createGroupMeshes(instancePath, geometryGroups, groupElements);
+  }
+
+  /**
+   * Create group meshes for given groups, retrieves from map if already present
+   * @param instancePath
+   * @param geometryGroups
+   * @param groups
+   */
+  createGroupMeshes(instancePath, geometryGroups, groups) {
+    if (!this.hasInstance(instancePath)) {
+      return;
+    }
+    const mergedMesh = this.meshes[instancePath];
+    // switch visible flag to false for merged mesh and remove from scene
+    mergedMesh.visible = false;
+
+    for (const g in groups) {
+      let groupName = g;
+      if (groupName.indexOf(instancePath) <= -1) {
+        groupName = `${instancePath}.${g}`;
+      }
+
+      let groupMesh = this.splitMeshes[groupName];
+      const geometryGroup = geometryGroups[groupName];
+
+      if (mergedMesh instanceof THREE.Line) {
+        const material = this.getLineMaterial();
+        groupMesh = new THREE.LineSegments(geometryGroup, material);
+      } else {
+        const material = this.getMeshPhongMaterial();
+        groupMesh = new THREE.Mesh(geometryGroup, material);
+      }
+      groupMesh.instancePath = instancePath;
+      groupMesh.geometryIdentifier = g;
+      groupMesh.geometry.dynamic = false;
+      groupMesh.position.copy(mergedMesh.position);
+
+      this.splitMeshes[groupName] = groupMesh;
+
+      // Update visualization feature for a mesh
+      if (mergedMesh.ghosted) {
+        this.unselectedTransparent([groupMesh], true);
+      }
+      if (mergedMesh.selected) {
+        this.selectInstance(groupName);
+      }
+      groupMesh.selected = mergedMesh.selected;
+
+      // add split mesh to scenne and set flag to visible
+      groupMesh.visible = true;
+    }
+  }
+
+  /**
+   * Make unselected instances transparent or not
+   *
+   * @param {boolean}
+   *            apply - Turn on or off the transparency
+   */
+  unselectedTransparent(apply) {
+    // TODO: Add this feature
+    console.log('unselectedTransparent');
+    // GEPPETTO.SceneController.unselectedTransparent(this.meshes, apply);
+    // GEPPETTO.SceneController.unselectedTransparent(this.splitMeshes, apply);
+  }
+
+  /**
+   * Selects an aspect given the path of it. Color changes to yellow, and opacity become 100%.
+   *
+   * @param {String}
+   *            instancePath - Path of aspect of mesh to select
+   */
+  selectInstance(instancePath, geometryIdentifier) {
+    // TODO: Add this feature
+    console.log('selectInstance');
+    // if (!this.hasInstance(instancePath)) {
+    //   return;
+    // }
+    // var that = this;
+    // if (geometryIdentifier != undefined && geometryIdentifier != '') {
+    //   instancePath = instancePath + '.' + geometryIdentifier;
+    // }
+    // var meshes = this.getRealMeshesForInstancePath(instancePath);
+    // if (meshes.length > 0) {
+    //   for (var meshesIndex in meshes) {
+    //     var mesh = meshes[meshesIndex];
+
+    //     if (!mesh.visible) {
+    //       this.merge(instancePath, true);
+    //     }
+    //     if (mesh.selected == false) {
+    //       if (mesh instanceof THREE.Object3D) {
+    //         mesh.traverse(function (child) {
+    //           if (Object.prototype.hasOwnProperty.call(child, 'material')) {
+    //             that.setThreeColor(
+    //               child.material.color,
+    //               GEPPETTO.Resources.COLORS.SELECTED
+    //             );
+    //             child.material.opacity = Math.max(
+    //               0.5,
+    //               child.material.defaultOpacity
+    //             );
+
+    //             if (GEPPETTO.isKeyPressed('c')) {
+    //               child.geometry.computeBoundingBox();
+    //               that.controls.target.copy(child.position);
+    //               that.controls.target.add(
+    //                 child.geometry.boundingBox.getCenter()
+    //               );
+    //             }
+    //           }
+    //         });
+    //       } else {
+    //         this.setThreeColor(
+    //           mesh.material.color,
+    //           GEPPETTO.Resources.COLORS.SELECTED
+    //         );
+    //         mesh.material.opacity = Math.max(0.5, mesh.material.defaultOpacity);
+    //         if (GEPPETTO.isKeyPressed('c')) {
+    //           mesh.geometry.computeBoundingBox();
+    //           // let's set the center of rotation to the selected mesh
+    //           this.controls.target.copy(mesh.position);
+    //           this.controls.target.add(mesh.geometry.boundingBox.getCenter());
+    //         }
+    //       }
+    //       mesh.selected = true;
+    //       mesh.ghosted = false;
+
+    //       this.camera.updateProjectionMatrix();
+    //     }
+    //     if (GEPPETTO.isKeyPressed('z')) {
+    //       this.zoomTo([eval(instancePath)]);
+    //     }
+    //   }
+    // }
+
+    // var instance = eval(instancePath);
+
+    // // Behaviour: help exploration of networks by ghosting and not highlighting non connected or selected
+    // if (instance !== undefined && instance.getConnections().length > 0) {
+    //   // allOtherMeshes will contain a list of all the non connected entities in the scene
+    //   var allOtherMeshes = $.extend({}, this.meshes);
+    //   // look on the simulation selection options and perform necessary operations
+    //   if (
+    //     G.getSelectionOptions().show_inputs &&
+    //     G.getSelectionOptions().show_outputs
+    //   ) {
+    //     var meshes = this.highlightInstances(instancePath, true);
+    //     for (var i in meshes) {
+    //       delete allOtherMeshes[meshes[i]];
+    //     }
+    //   } else if (G.getSelectionOptions().show_inputs) {
+    //     var inputs = this.highlightInstances(true, GEPPETTO.Resources.INPUT);
+    //     for (var i in inputs) {
+    //       delete allOtherMeshes[inputs[i]];
+    //     }
+    //   } else if (G.getSelectionOptions().show_outputs) {
+    //     var outputs = this.highlightInstances(true, GEPPETTO.Resources.OUTPUT);
+    //     for (var o in outputs) {
+    //       delete allOtherMeshes[outputs[o]];
+    //     }
+    //   }
+    //   if (G.getSelectionOptions().draw_connection_lines) {
+    //     this.showConnectionLines(instancePath, true);
+    //   }
+    //   if (G.getSelectionOptions().unselected_transparent) {
+    //     this.unselectedTransparent(allOtherMeshes, true);
+    //   }
+    // }
+  }
+
+  /**
+   * Add mesh to geometry groups
+   *
+   * @param {String}
+   *            instancePath - Path of aspect, corresponds to original merged mesh
+   * @param {String}
+   *            id - local path to the group
+   * @param {object}
+   *            groups - The groups that we need to split mesh into
+   * @param {object}
+   *            m - current mesh
+   */
+  addMeshToGeometryGroup(instance, id, geometryGroups, m) {
+    if (!this.hasInstance(instance)) {
+      return;
+    }
+    // name of group, mix of aspect path and group name
+    const groupName = `${instance.getInstancePath()}.${id}`;
+    // retrieve corresponding geometry for this group
+    const geometry = geometryGroups[groupName];
+    // only merge if flag is set to true
+    if (m instanceof THREE.Line) {
+      geometry.vertices.push(m.geometry.vertices[0]);
+      geometry.vertices.push(m.geometry.vertices[1]);
+    } else {
+      // merged mesh into corresponding geometry
+      geometry.merge(m.geometry, m.matrix);
+    }
+    // eslint-disable-next-line consistent-return
+    return true;
+  }
+
   generate3DObjects(instance) {
-    // TODO: Add previous meshes
-    // TODO: Add split meshes
+    const previous3DObject = this.meshes[instance.getInstancePath()];
+    let color;
+    if (previous3DObject) {
+      color = previous3DObject.material.defaultColor;
+      // TODO: Remove preivous meshes from scene
+      const { splitMeshes } = this;
+      for (const m in splitMeshes) {
+        if (m.indexOf(instance.getInstancePath()) != -1) {
+          // TODO: Remove split meshes from scene
+        }
+      }
+    }
+
     // TODO: This can be optimised, no need to create both
-    // TODO: Add color
     const materials = {
-      mesh: this.getMeshPhongMaterial(),
-      line: this.getLineMaterial(),
+      mesh: this.getMeshPhongMaterial(color),
+      line: this.getLineMaterial(color),
     };
 
     const instanceObjects = [];
@@ -305,13 +652,16 @@ export default class GeppettoThree {
         threeObject = this.loadThreeOBJModelFromNode(node);
         this.complexity++;
         break;
-
-      // TODO: Add collada and OBJ loaders
     }
 
     if (threeObject) {
       // TODO: shouldn't that be the vistree? why is it also done at the loadEntity level??
-      // TODO: Add visuamModelMap
+      threeObject.visible = true;
+      const instancePath = `${instance.getInstancePath()}.${id}`;
+      threeObject.instancePath = instancePath;
+      threeObject.highlighted = false;
+
+      this.visualModelMap[instancePath] = threeObject;
     }
     return threeObject;
   }
@@ -533,17 +883,106 @@ export default class GeppettoThree {
     }
   }
 
+  /**
+   * Shows a visual group
+   * @param visualGroups
+   * @param mode
+   * @param instances
+   */
+  showVisualGroups(visualGroups, mode, instances) {
+    for (let i = 0; i < instances.length; i++) {
+      const instance = instances[i];
+      const instancePath = instance.getInstancePath();
+      this.merge(instancePath, true);
+      if (mode) {
+        const mergedMesh = this.meshes[instancePath];
+        const map = mergedMesh.mergedMeshesPaths;
+        // no mergedMeshesPaths means object hasn't been merged, single object
+        if (map != undefined || null) {
+          this.splitGroups(instance, visualGroups);
+          this.showVisualGroupsRaw(visualGroups, instance, this.splitMeshes);
+        } else {
+          this.showVisualGroupsRaw(visualGroups, instance, this.meshes);
+        }
+      }
+    }
+  }
+
+  /**
+   *
+   * @param visualGroups
+   * @param instance
+   * @param meshesContainer
+   */
+  showVisualGroupsRaw(visualGroups, instance, meshesContainer) {
+    const instancePath = instance.getInstancePath();
+    for (const g in visualGroups) {
+      // retrieve visual group object
+      const visualGroup = visualGroups[g];
+
+      // get full group name to access group mesh
+      let groupName = g;
+      if (groupName.indexOf(instancePath) <= -1) {
+        groupName = `${instancePath}.${g}`;
+      }
+
+      // get group mesh
+      const groupMesh = meshesContainer[groupName];
+      groupMesh.visible = true;
+      this.setThreeColor(groupMesh.material.color, visualGroup.color);
+    }
+  }
+
+  /**
+   * Merge mesh that was split before
+   *
+   *            aspectPath - Path to aspect that points to mesh
+   * @param instancePath
+   * @param visible
+   */
+  merge(instancePath, visible) {
+    // get mesh from map
+    const mergedMesh = this.meshes[instancePath];
+
+    // if merged mesh is not visible, turn it on and turn split one off
+    if (!mergedMesh.visible) {
+      for (const path in this.splitMeshes) {
+        // retrieve split mesh that is on the scene
+        const splitMesh = this.splitMeshes[path];
+        if (splitMesh) {
+          if (instancePath == splitMesh.instancePath) {
+            splitMesh.visible = false;
+          }
+        }
+      }
+      if (visible) {
+        // add merged mesh to scene and set flag to true
+        mergedMesh.visible = true;
+      }
+    }
+  }
+
   hasInstance(instance) {
     const instancePath =
       typeof instance == 'string' ? instance : instance.getInstancePath();
     return this.meshes[instancePath] != undefined;
   }
 
+  /**
+   * Get Meshes associated to an instance
+   *
+   * @param {String}
+   *            instancePath - Path of the instance
+   */
   getRealMeshesForInstancePath(instancePath) {
     const meshes = [];
-
-    // TODO: Add split meshes
-    if (instancePath in this.meshes) {
+    if (instancePath in this.splitMeshes) {
+      for (const keySplitMeshes in this.splitMeshes) {
+        if (keySplitMeshes.startsWith(instancePath)) {
+          meshes.push(this.splitMeshes[keySplitMeshes]);
+        }
+      }
+    } else if (instancePath in this.meshes) {
       meshes.push(this.meshes[instancePath]);
     }
     return meshes;
