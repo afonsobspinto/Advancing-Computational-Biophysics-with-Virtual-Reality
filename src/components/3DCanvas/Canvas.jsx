@@ -23,8 +23,9 @@ const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    const { threshold } = this.props;
+    const { threshold, instances } = this.props;
     this.geppettoThree = new GeppettoThree(threshold);
+    this.geppettoThree.traverseInstances(instances);
     this.canvasRef = React.createRef();
     this.sceneRef = React.createRef();
     this.handleHover = this.handleHover.bind(this);
@@ -62,12 +63,6 @@ class Canvas extends Component {
   }
 
   componentDidUpdate() {
-    const { colorMap } = this.props;
-    if (colorMap !== {}) {
-      for (const path in colorMap) {
-        this.setColor(path, colorMap[path]);
-      }
-    }
     this.setEntityMeshes();
   }
 

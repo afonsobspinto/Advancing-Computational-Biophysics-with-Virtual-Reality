@@ -12,9 +12,9 @@ export default class GeppettoThree {
     this.visualModelMap = {};
   }
 
-  getThreeMeshes(instances) {
-    this.traverseInstances(instances);
+  getThreeMeshes() {
     // TODO: set geometry type
+    // TODO: Make sure this is correct:
     return { ...this.meshes, ...this.splitMeshes };
   }
 
@@ -961,11 +961,21 @@ export default class GeppettoThree {
     return this.meshes[instancePath] != undefined;
   }
 
+  /**
+   * Get Meshes associated to an instance
+   *
+   * @param {String}
+   *            instancePath - Path of the instance
+   */
   getRealMeshesForInstancePath(instancePath) {
     const meshes = [];
-
-    // TODO: Add split meshes
-    if (instancePath in this.meshes) {
+    if (instancePath in this.splitMeshes) {
+      for (const keySplitMeshes in this.splitMeshes) {
+        if (keySplitMeshes.startsWith(instancePath)) {
+          meshes.push(this.splitMeshes[keySplitMeshes]);
+        }
+      }
+    } else if (instancePath in this.meshes) {
       meshes.push(this.meshes[instancePath]);
     }
     return meshes;
