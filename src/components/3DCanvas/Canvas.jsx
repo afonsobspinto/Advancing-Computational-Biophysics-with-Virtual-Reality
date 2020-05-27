@@ -25,7 +25,7 @@ class Canvas extends Component {
     super(props);
     const { threshold, instances } = this.props;
     this.state = {
-      visualGroupss: false,
+      visualGroups: false,
     };
     this.geppettoThree = new GeppettoThree(threshold);
     this.geppettoThree.init(instances);
