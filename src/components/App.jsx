@@ -9,7 +9,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedModel: models[0],
+      selectedModel: models[2],
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);

@@ -17,6 +17,7 @@ module.exports = {
         __dirname,
         './geppetto-client/geppetto-client'
       ),
+      assets: path.resolve(__dirname, './assets'),
     },
     extensions: ['.js', '.jsx'],
   },

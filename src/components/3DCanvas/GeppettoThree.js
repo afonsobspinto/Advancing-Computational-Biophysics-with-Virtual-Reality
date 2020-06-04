@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable eqeqeq */
+import particle from '../../../assets/3dparticle.png';
 
 require('./OBJLoader');
 
@@ -16,6 +17,14 @@ export default class GeppettoThree {
     // TODO: set geometry type
     // TODO: Make sure this is correct:
     return { ...this.meshes, ...this.splitMeshes };
+  }
+
+  initTextures(callback) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(particle, (texture) => {
+      this.particleTexture = texture;
+      callback();
+    });
   }
 
   init(instances) {
@@ -840,7 +849,7 @@ export default class GeppettoThree {
       console.log(item, loaded, total);
     };
     const loader = new THREE.OBJLoader(manager);
-    const scene = loader.parse(node.obj);
+    const scene = loader.parse(node.obj, this.particleTexture);
     const that = this;
     scene.traverse(function (child) {
       if (child instanceof THREE.Mesh) {

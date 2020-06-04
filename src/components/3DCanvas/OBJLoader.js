@@ -391,12 +391,11 @@ THREE.OBJLoader = (function () {
       return this;
     },
 
-    createMesh: function (vertices, color) {
+    createMesh: function (vertices, color, texture) {
       var i, c;
       var vl = vertices.length;
 
       var geometry = new THREE.Geometry();
-      var vertices_tmp = [];
 
       for (i = 0; i < vl; i++) {
         geometry.vertices.push(
@@ -406,10 +405,9 @@ THREE.OBJLoader = (function () {
       var threeColor = new THREE.Color();
       threeColor.setHex(color);
 
-      var textureLoader = new THREE.TextureLoader();
       var material = new THREE.PointsMaterial({
         size: 2,
-        map: textureLoader.load(particle),
+        map: texture,
         blending: THREE.AdditiveBlending,
         depthTest: false,
         transparent: true,
@@ -420,7 +418,7 @@ THREE.OBJLoader = (function () {
       return new THREE.Points(geometry, material);
     },
 
-    parse: function (text) {
+    parse: function (text, texture) {
       var state = new ParserState();
 
       if (text.indexOf('\r\n') !== -1) {
@@ -771,7 +769,8 @@ THREE.OBJLoader = (function () {
         container.add(
           this.createMesh(
             state.vertices,
-            '0x' + Math.floor(Math.random() * 16777215).toString(16)
+            '0x' + Math.floor(Math.random() * 16777215).toString(16),
+            texture
           )
         );
       }

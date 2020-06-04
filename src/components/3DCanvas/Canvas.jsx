@@ -23,21 +23,24 @@ const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    const { threshold, instances } = this.props;
+    const { threshold } = this.props;
     this.state = {
+      loadedTextures: false,
       visualGroups: false,
     };
     this.geppettoThree = new GeppettoThree(threshold);
-    this.geppettoThree.init(instances);
     this.canvasRef = React.createRef();
     this.sceneRef = React.createRef();
+    this.handleLoadedTextures = this.handleLoadedTextures.bind(this);
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
+    this.threeMeshes = {};
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
+    this.geppettoThree.initTextures(this.handleLoadedTextures);
   }
 
   componentDidMount() {
@@ -138,6 +141,10 @@ class Canvas extends Component {
     }
   }
 
+  handleLoadedTextures() {
+    this.setState({ loadedTextures: true });
+  }
+
   handleHover(evt) {
     const { handleHover } = this.props;
     if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
@@ -211,10 +218,15 @@ class Canvas extends Component {
 
   render() {
     const { sceneBackground, model, instances, id, position } = this.props;
+    const { loadedTextures } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
-    this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+
+    if (loadedTextures) {
+      this.geppettoThree.init(instances);
+      this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+    }
 
     return (
       <a-scene
