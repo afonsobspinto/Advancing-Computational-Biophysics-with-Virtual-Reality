@@ -217,7 +217,12 @@ class Canvas extends Component {
     this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
 
     return (
-      <a-scene id={sceneID} ref={this.sceneRef} background={sceneBackground}>
+      <a-scene
+        stats
+        id={sceneID}
+        ref={this.sceneRef}
+        background={sceneBackground}
+      >
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img id="ca1" src={CA1} alt="ca1 thumbnail" />
