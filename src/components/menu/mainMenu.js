@@ -1,5 +1,5 @@
 import { MENU_CLICK } from '../Events';
-import { SET_PROJECT_MENU } from './menuStates';
+import { SET_PROJECT_MENU, VISUAL_GROUPS_MENU } from './menuStates';
 
 const mainMenu = [
   {
@@ -10,8 +10,8 @@ const mainMenu = [
   },
   {
     event: MENU_CLICK,
-    evtDetail: 'activate_visual_group',
-    text: 'Activate Visual Groups',
+    evtDetail: VISUAL_GROUPS_MENU.id,
+    text: 'Show Potassium Distribution',
     color: '#48BAEA',
   },
   {

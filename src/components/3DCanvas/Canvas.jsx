@@ -21,8 +21,12 @@ import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import models from '../../models/models';
-import { MENU_CLICK, MODEL_CHANGED, BACK_MENU } from '../Events';
-import { MAIN_MENU, SET_PROJECT_MENU } from '../menu/menuStates';
+import { MENU_CLICK, MODEL_CHANGED, BACK_MENU, VISUAL_GROUPS } from '../Events';
+import {
+  MAIN_MENU,
+  SET_PROJECT_MENU,
+  VISUAL_GROUPS_MENU,
+} from '../menu/menuStates';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -50,6 +54,7 @@ class Canvas extends Component {
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
     this.geppettoThree.initTextures(this.handleLoadedTextures);
+    this.isReady = false;
     this.menuHistory = [];
   }
 
@@ -62,7 +67,7 @@ class Canvas extends Component {
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
     this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
     // TODO: remove this workaround
-    this.sceneRef.current.addEventListener('visual_groups', (evt) =>
+    this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
       this.showVisualGroups(
         evt.detail.groups,
         evt.detail.mode,
@@ -267,6 +272,13 @@ class Canvas extends Component {
     } else if (event === BACK_MENU) {
       const lastMenu = this.menuHistory.pop();
       this.setState({ currentMenu: lastMenu });
+    } else if (event === VISUAL_GROUPS) {
+      eval(
+        `network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()[${parseInt(
+          detail,
+          10
+        )}].show(true)`
+      );
     }
   }
 
@@ -298,7 +310,10 @@ class Canvas extends Component {
     const modelID = `${id}_model`;
 
     if (loadedTextures) {
-      this.geppettoThree.init(instances);
+      if (!this.isReady) {
+        this.geppettoThree.init(instances);
+        this.isReady = true;
+      }
       this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
     }
 
@@ -322,6 +337,24 @@ class Canvas extends Component {
       }
       menu = projectMenu;
       menuTitle = SET_PROJECT_MENU.title;
+      back = true;
+    } else if (currentMenu === VISUAL_GROUPS_MENU.id) {
+      const visualGroupsMenu = [];
+      // eslint-disable-next-line no-eval
+      const visualGroups = eval(
+        'network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()'
+      );
+      for (let i = 0; i < visualGroups.length; i++) {
+        const vg = visualGroups[i];
+        visualGroupsMenu.push({
+          text: vg.wrappedObj.name,
+          color: '#48BAEA',
+          event: VISUAL_GROUPS,
+          evtDetail: i,
+        });
+      }
+      menu = visualGroupsMenu;
+      menuTitle = VISUAL_GROUPS_MENU.title;
       back = true;
     }
 

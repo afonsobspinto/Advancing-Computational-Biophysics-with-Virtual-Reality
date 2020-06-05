@@ -13,14 +13,18 @@ class Menu extends Component {
 
     const buttonsMap = [];
 
-    let yPos = 0;
+    const shrink = buttons.length > 6;
+    let yPos = shrink ? 1.4 : 0;
     for (const b of buttons) {
       buttonsMap.push({
         ...b,
         position: `0 ${yPos} 0.01`,
+        width: b.text.length > 20 ? 1.9 : 1.3,
       });
-      yPos -= 0.5;
+      yPos -= shrink ? 0.4 : 0.5;
     }
+
+    const titleYPos = shrink ? 1.8 : 1.2;
 
     // TODO: Add collapse, button controller to bring back?
     const arrowButton = back ? (
@@ -48,7 +52,7 @@ class Menu extends Component {
         <a-entity
           id="title"
           text={`value: ${menuTitle}; color: #FAFAFA; width: 4; align: center`}
-          position="0 1.2 0.01"
+          position={`0 ${titleYPos} 0.01`}
         />
 
         {buttonsMap.map((button) => (
@@ -58,7 +62,7 @@ class Menu extends Component {
             mixin="button"
             text={`value: ${button.text}; color: ${button.color}`}
             position={button.position}
-            slice9="width: 1.3; height: 0.3; color: #030303"
+            slice9={`width: ${button.width}; height: 0.3; color: #030303`}
             menu-interactable={`id: ${id}; event: ${button.event}; evtDetail: ${button.evtDetail}`}
           />
         ))}
