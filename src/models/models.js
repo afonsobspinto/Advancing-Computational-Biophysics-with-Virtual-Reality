@@ -11,6 +11,7 @@ const models = [
         'acnet2.baskets_12': '#003398',
         'acnet2.pyramidals_48': '#cb0000',
       },
+      position: '-20 18 -80',
     },
     imageID: '#auditory_cortex',
     instances: ['acnet2'],
@@ -48,6 +49,7 @@ const models = [
         VFB_00030840: 0.3,
         VFB_00030632: 0.3,
       },
+      position: '0 2 -50',
     },
     imageID: '#vfb',
     instances: [
