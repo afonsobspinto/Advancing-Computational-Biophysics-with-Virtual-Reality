@@ -893,6 +893,39 @@ export default class GeppettoThree {
   }
 
   /**
+   * Change the default opacity for a given aspect. The opacity set with this command API will be persisted across different workflows, e.g. selection.
+   *
+   * @param {String}
+   *            instancePath - Instance path of aspect to change opacity for
+   */
+  setOpacity(instancePath, opacity) {
+    if (!this.hasInstance(instancePath)) {
+      return;
+    }
+    const mesh = this.meshes[instancePath];
+    if (mesh != undefined) {
+      mesh.defaultOpacity = opacity;
+      if (opacity == 1) {
+        mesh.traverse(function (object) {
+          if (Object.prototype.hasOwnProperty.call(object, 'material')) {
+            object.material.transparent = false;
+            object.material.opacity = 1;
+            object.material.defaultOpacity = 1;
+          }
+        });
+      } else {
+        mesh.traverse(function (object) {
+          if (Object.prototype.hasOwnProperty.call(object, 'material')) {
+            object.material.transparent = true;
+            object.material.opacity = opacity;
+            object.material.defaultOpacity = opacity;
+          }
+        });
+      }
+    }
+  }
+
+  /**
    * Shows a visual group
    * @param visualGroups
    * @param mode

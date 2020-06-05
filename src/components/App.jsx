@@ -18,8 +18,6 @@ export default class App extends Component {
       this.instances.push(Instances.getInstance(instance))
     );
     this.handleModel = this.handleModel.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleHover = this.handleHover.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -42,13 +40,14 @@ export default class App extends Component {
     }
   }
 
-  handleClick(evt, isSelected) {}
-
-  handleHover(evt) {}
-
   render() {
     const { selectedModel } = this.state;
-    const { colorMap, sceneBackground, position } = selectedModel.props;
+    const {
+      colorMap,
+      sceneBackground,
+      position,
+      opacityMap,
+    } = selectedModel.props;
 
     return (
       <div
@@ -63,6 +62,7 @@ export default class App extends Component {
               model={selectedModel.name}
               instances={this.instances}
               colorMap={colorMap}
+              opacityMap={opacityMap}
               position={position}
               sceneBackground={sceneBackground}
               handleClick={this.handleClick}

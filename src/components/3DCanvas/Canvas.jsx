@@ -8,7 +8,6 @@ import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
 import GeppettoThree from './GeppettoThree';
-import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
@@ -59,16 +58,21 @@ class Canvas extends Component {
       )
     );
 
-    const { colorMap } = this.props;
+    const { colorMap, opacityMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
         this.setColor(path, colorMap[path]);
       }
     }
+    if (opacityMap !== {}) {
+      for (const path in opacityMap) {
+        this.setOpacity(path, opacityMap[path]);
+      }
+    }
     this.setEntityMeshes();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     const { instances } = this.props;
     if (instances !== nextProps.instances) {
       this.geppettoThree.init(nextProps.instances);
@@ -77,12 +81,17 @@ class Canvas extends Component {
   }
 
   componentDidUpdate() {
-    const { colorMap } = this.props;
+    const { colorMap, opacityMap } = this.props;
     const { visualGroups } = this.state;
     if (!visualGroups) {
       if (colorMap !== {}) {
         for (const path in colorMap) {
           this.setColor(path, colorMap[path]);
+        }
+      }
+      if (opacityMap !== {}) {
+        for (const path in opacityMap) {
+          this.setOpacity(path, opacityMap[path]);
         }
       }
     }
@@ -111,6 +120,37 @@ class Canvas extends Component {
         }
       }
     }
+    return this;
+  }
+
+  /**
+   *
+   * @param instancePath
+   * @param opacity
+   * @returns {Canvas}
+   */
+  setOpacity(instancePath, opacity) {
+    // eslint-disable-next-line no-eval
+    const entity = eval(instancePath);
+    if (entity.hasCapability('VisualCapability')) {
+      if (entity instanceof Instance || entity instanceof ArrayInstance) {
+        this.geppettoThree.setOpacity(instancePath, opacity);
+
+        if (typeof entity.getChildren === 'function') {
+          const children = entity.getChildren();
+          for (let i = 0; i < children.length; i++) {
+            this.setOpacity(children[i].getInstancePath(), opacity, true);
+          }
+        }
+      } else if (entity instanceof Type || entity instanceof Variable) {
+        // fetch all instances for the given type or variable and call hide on each
+        const instances = GEPPETTO.ModelFactory.getAllInstancesOf(entity);
+        for (let j = 0; j < instances.length; j++) {
+          this.setOpacity(instancePath, opacity, true);
+        }
+      }
+    }
+
     return this;
   }
 
@@ -282,6 +322,7 @@ class Canvas extends Component {
 Canvas.defaultProps = {
   threshold: 1000,
   colorMap: {},
+  opacityMap: {},
   position: '-20 -20 -80',
   sceneBackground: 'color: #ECECEC',
   handleHover: () => {},
@@ -295,6 +336,7 @@ Canvas.propTypes = {
   id: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
+  opacityMap: PropTypes.object,
   position: PropTypes.string,
   sceneBackground: PropTypes.string,
   handleHover: PropTypes.func,
