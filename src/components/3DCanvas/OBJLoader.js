@@ -3,7 +3,7 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
-import particle from '../../../assets/3dparticle.png';
+import particle from '../../../assets/particle.png';
 var THREE = window.THREE || require('three');
 THREE.OBJLoader = (function () {
   // o object_name | g group_name
@@ -406,7 +406,7 @@ THREE.OBJLoader = (function () {
       threeColor.setHex(color);
 
       var material = new THREE.PointsMaterial({
-        size: 2,
+        size: 0.05,
         map: texture,
         blending: THREE.AdditiveBlending,
         depthTest: false,

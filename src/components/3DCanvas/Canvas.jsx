@@ -21,6 +21,7 @@ import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import models from '../../models/models';
+import { MENU_CLICK, MODEL_CHANGED, SET_PROJECT } from '../Events';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -253,7 +254,13 @@ class Canvas extends Component {
   }
 
   handleMenuClick(evt) {
-    this.setState({ currentMenu: evt.detail });
+    const { handleModelChange } = this.props;
+    const { event, detail } = evt.detail;
+    if (event === MENU_CLICK) {
+      this.setState({ currentMenu: detail });
+    } else if (event === MODEL_CHANGED) {
+      handleModelChange(detail);
+    }
   }
 
   /**
@@ -293,15 +300,15 @@ class Canvas extends Component {
     if (currentMenu === 'main') {
       menu = mainMenu;
       menuTitle = 'Main Menu';
-    } else if (currentMenu === 'set_project') {
+    } else if (currentMenu === SET_PROJECT) {
       const projectMenu = [];
       for (const m of models) {
         if (m.name !== model) {
           projectMenu.push({
             text: m.name,
             color: m.color,
-            event: 'model_changed',
-            evt_detail: m.name,
+            event: MODEL_CHANGED,
+            evtDetail: m.name,
           });
         }
       }
@@ -412,6 +419,7 @@ Canvas.defaultProps = {
   handleHover: () => {},
   handleClick: () => {},
   handleHoverLeave: () => {},
+  handleModelChange: () => {},
 };
 
 Canvas.propTypes = {
@@ -427,6 +435,7 @@ Canvas.propTypes = {
   handleHover: PropTypes.func,
   handleClick: PropTypes.func,
   handleHoverLeave: PropTypes.func,
+  handleModelChange: PropTypes.func,
 };
 
 export default Canvas;

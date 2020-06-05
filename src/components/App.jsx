@@ -9,7 +9,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedModel: models[2],
+      selectedModel: models[1],
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);
@@ -17,17 +17,13 @@ export default class App extends Component {
     selectedModel.instances.forEach((instance) =>
       this.instances.push(Instances.getInstance(instance))
     );
-    this.handleModel = this.handleModel.bind(this);
+    this.handleModelChange = this.handleModelChange.bind(this);
     this.canvasRef = React.createRef();
   }
 
-  componentDidMount() {
-    this.canvasRef.current.addEventListener('model_changed', this.handleModel);
-  }
-
-  handleModel(evt) {
+  handleModelChange(newModel) {
     for (const model of models) {
-      if (model.name === evt.detail) {
+      if (model.name === newModel) {
         GEPPETTO.Manager.loadModel(model.model);
         this.instances = [];
         model.instances.forEach((instance) =>
@@ -69,6 +65,7 @@ export default class App extends Component {
               sceneBackground={sceneBackground}
               handleClick={this.handleClick}
               handleHover={this.handleHover}
+              handleModelChange={this.handleModelChange}
             />
           ) : (
             ''

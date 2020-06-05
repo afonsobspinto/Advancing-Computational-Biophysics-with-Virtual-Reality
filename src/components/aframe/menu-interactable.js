@@ -1,5 +1,12 @@
+import { MENU_CLICK } from '../Events';
+
 function clicked(target, event, detail) {
-  const evt = new CustomEvent(event, { detail: detail });
+  const evt = new CustomEvent(MENU_CLICK, {
+    detail: {
+      event: event,
+      detail: detail,
+    },
+  });
   target.dispatchEvent(evt);
 }
 
@@ -7,22 +14,28 @@ AFRAME.registerComponent('menu-interactable', {
   schema: {
     id: { type: 'string' },
     event: { type: 'string' },
-    evt_detail: { type: 'string' },
+    evtDetail: { type: 'string' },
   },
   init: function () {
     const { el } = this;
-    // eslint-disable-next-line camelcase
-    const { id, event, evt_detail } = this.data;
+    const { id, event, evtDetail } = this.data;
     this.scene = document.getElementById(`${id}_scene`);
 
-    el.addEventListener('triggerdown', () => {
-      clicked(this.scene, event, evt_detail);
-    });
+    el.addEventListener(
+      'triggerdown',
+      clicked.bind(this, this.scene, event, evtDetail)
+    );
 
-    el.addEventListener('click', () => {
-      clicked(this.scene, event, evt_detail);
-    });
+    el.addEventListener(
+      'click',
+      clicked.bind(this, this.scene, event, evtDetail)
+    );
   },
 
-  // TODO: Remove event listeners
+  remove: function () {
+    const { el } = this;
+
+    el.removeEventListener('click', clicked);
+    el.removeEventListener('triggerdown', clicked);
+  },
 });

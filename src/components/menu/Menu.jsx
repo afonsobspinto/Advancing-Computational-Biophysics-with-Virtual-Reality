@@ -38,13 +38,13 @@ class Menu extends Component {
 
         {buttonsMap.map((button) => (
           <a-entity
-            key={button.evt_detail}
+            key={button.evtDetail}
             class="collidable"
             mixin="button"
             text={`value: ${button.text}; color: ${button.color}`}
             position={button.position}
             slice9="width: 1.3; height: 0.3; color: #030303"
-            menu-interactable={`id: ${id}; event: ${button.event}; evt_detail: ${button.evt_detail}`}
+            menu-interactable={`id: ${id}; event: ${button.event}; evtDetail: ${button.evtDetail}`}
           />
         ))}
       </a-entity>
