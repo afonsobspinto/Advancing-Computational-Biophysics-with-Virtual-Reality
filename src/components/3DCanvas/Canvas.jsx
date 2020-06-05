@@ -7,8 +7,8 @@ import ArrayInstance from '@geppettoengine/geppetto-client/js/geppettoModel/mode
 import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
+import 'aframe-environment-component';
 import GeppettoThree from './GeppettoThree';
-import ShowcaseGallery from '../ShowcaseGallery';
 import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
@@ -16,6 +16,7 @@ import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png
 import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
+import '../aframe/scroll-movement';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -23,18 +24,24 @@ const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    const { threshold, instances } = this.props;
+    const { threshold } = this.props;
+    this.state = {
+      loadedTextures: false,
+      visualGroups: false,
+    };
     this.geppettoThree = new GeppettoThree(threshold);
-    this.geppettoThree.init(instances);
     this.canvasRef = React.createRef();
     this.sceneRef = React.createRef();
+    this.handleLoadedTextures = this.handleLoadedTextures.bind(this);
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
+    this.threeMeshes = {};
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
+    this.geppettoThree.initTextures(this.handleLoadedTextures);
   }
 
   componentDidMount() {
@@ -53,16 +60,21 @@ class Canvas extends Component {
       )
     );
 
-    const { colorMap } = this.props;
+    const { colorMap, opacityMap } = this.props;
     if (colorMap !== {}) {
       for (const path in colorMap) {
         this.setColor(path, colorMap[path]);
       }
     }
+    if (opacityMap !== {}) {
+      for (const path in opacityMap) {
+        this.setOpacity(path, opacityMap[path]);
+      }
+    }
     this.setEntityMeshes();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     const { instances } = this.props;
     if (instances !== nextProps.instances) {
       this.geppettoThree.init(nextProps.instances);
@@ -71,6 +83,20 @@ class Canvas extends Component {
   }
 
   componentDidUpdate() {
+    const { colorMap, opacityMap } = this.props;
+    const { visualGroups } = this.state;
+    if (!visualGroups) {
+      if (colorMap !== {}) {
+        for (const path in colorMap) {
+          this.setColor(path, colorMap[path]);
+        }
+      }
+      if (opacityMap !== {}) {
+        for (const path in opacityMap) {
+          this.setOpacity(path, opacityMap[path]);
+        }
+      }
+    }
     this.setEntityMeshes();
   }
 
@@ -99,6 +125,37 @@ class Canvas extends Component {
     return this;
   }
 
+  /**
+   *
+   * @param instancePath
+   * @param opacity
+   * @returns {Canvas}
+   */
+  setOpacity(instancePath, opacity) {
+    // eslint-disable-next-line no-eval
+    const entity = eval(instancePath);
+    if (entity.hasCapability('VisualCapability')) {
+      if (entity instanceof Instance || entity instanceof ArrayInstance) {
+        this.geppettoThree.setOpacity(instancePath, opacity);
+
+        if (typeof entity.getChildren === 'function') {
+          const children = entity.getChildren();
+          for (let i = 0; i < children.length; i++) {
+            this.setOpacity(children[i].getInstancePath(), opacity, true);
+          }
+        }
+      } else if (entity instanceof Type || entity instanceof Variable) {
+        // fetch all instances for the given type or variable and call hide on each
+        const instances = GEPPETTO.ModelFactory.getAllInstancesOf(entity);
+        for (let j = 0; j < instances.length; j++) {
+          this.setOpacity(instancePath, opacity, true);
+        }
+      }
+    }
+
+    return this;
+  }
+
   setEntityMeshes() {
     const canvasEntity = this.canvasRef.current;
 
@@ -124,6 +181,10 @@ class Canvas extends Component {
       entity.setObject3D('mesh', mesh);
       i++;
     }
+  }
+
+  handleLoadedTextures() {
+    this.setState({ loadedTextures: true });
   }
 
   handleHover(evt) {
@@ -192,18 +253,37 @@ class Canvas extends Component {
    */
   showVisualGroups(visualGroup, mode, instances) {
     this.geppettoThree.showVisualGroups(visualGroup, mode, instances);
-    this.forceUpdate();
+    this.setState({
+      visualGroups: true,
+    });
   }
 
   render() {
-    const { sceneBackground, model, instances, id, position } = this.props;
+    const {
+      sceneBackground,
+      model,
+      instances,
+      id,
+      position,
+      rotation,
+    } = this.props;
+    const { loadedTextures } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
-    this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+
+    if (loadedTextures) {
+      this.geppettoThree.init(instances);
+      this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+    }
 
     return (
-      <a-scene id={sceneID} ref={this.sceneRef} background={sceneBackground}>
+      <a-scene
+        stats
+        id={sceneID}
+        ref={this.sceneRef}
+        background={sceneBackground}
+      >
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
           <img id="ca1" src={CA1} alt="ca1 thumbnail" />
@@ -214,19 +294,27 @@ class Canvas extends Component {
           />
         </a-assets>
 
-        <a-entity id={cameraID} position="0 1.6 0" thumbstick-controls>
+        <a-entity environment="preset: default" />
+
+        <a-entity
+          id={cameraID}
+          position="0 5 0"
+          thumbstick-controls
+          scroll-movement
+        >
           <a-camera
             cursor="rayOrigin: mouse"
             raycaster="objects: .collidable"
             acceleration="200"
           />
           <LaserControls id={id} />
-          <ShowcaseGallery model={model} />
+          {/* <ShowcaseGallery model={model} /> */}
         </a-entity>
 
         <a-entity
           ref={this.canvasRef}
           position={position}
+          rotation={rotation}
           scale="0.1, 0.1 0.1"
           id={modelID}
           rotatable={`id: ${id}`}
@@ -251,7 +339,9 @@ class Canvas extends Component {
 Canvas.defaultProps = {
   threshold: 1000,
   colorMap: {},
+  opacityMap: {},
   position: '-20 -20 -80',
+  rotation: '0 0 0',
   sceneBackground: 'color: #ECECEC',
   handleHover: () => {},
   handleClick: () => {},
@@ -264,7 +354,9 @@ Canvas.propTypes = {
   id: PropTypes.string.isRequired,
   threshold: PropTypes.number,
   colorMap: PropTypes.object,
+  opacityMap: PropTypes.object,
   position: PropTypes.string,
+  rotation: PropTypes.string,
   sceneBackground: PropTypes.string,
   handleHover: PropTypes.func,
   handleClick: PropTypes.func,

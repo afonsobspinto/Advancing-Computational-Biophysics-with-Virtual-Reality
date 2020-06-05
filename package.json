@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "aframe": "^1.0.4",
+    "aframe-environment-component": "^2.0.0",
     "aframe-layout-component": "^5.3.0",
     "aframe-log-component": "^1.0.7",
     "aframe-template-component": "^3.2.1",

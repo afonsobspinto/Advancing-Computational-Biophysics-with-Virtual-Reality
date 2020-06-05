@@ -9,7 +9,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedModel: models[1],
+      selectedModel: models[2],
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);
@@ -18,8 +18,6 @@ export default class App extends Component {
       this.instances.push(Instances.getInstance(instance))
     );
     this.handleModel = this.handleModel.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleHover = this.handleHover.bind(this);
     this.canvasRef = React.createRef();
   }
 
@@ -42,13 +40,15 @@ export default class App extends Component {
     }
   }
 
-  handleClick(evt, isSelected) {}
-
-  handleHover(evt) {}
-
   render() {
     const { selectedModel } = this.state;
-    const { colorMap, sceneBackground, position } = selectedModel.props;
+    const {
+      sceneBackground,
+      colorMap,
+      opacityMap,
+      position,
+      rotation,
+    } = selectedModel.props;
 
     return (
       <div
@@ -63,7 +63,9 @@ export default class App extends Component {
               model={selectedModel.name}
               instances={this.instances}
               colorMap={colorMap}
+              opacityMap={opacityMap}
               position={position}
+              rotation={rotation}
               sceneBackground={sceneBackground}
               handleClick={this.handleClick}
               handleHover={this.handleHover}

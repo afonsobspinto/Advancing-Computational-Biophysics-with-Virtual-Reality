@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable eqeqeq */
+import particle from '../../../assets/3dparticle.png';
 
 require('./OBJLoader');
 
@@ -16,6 +17,14 @@ export default class GeppettoThree {
     // TODO: set geometry type
     // TODO: Make sure this is correct:
     return { ...this.meshes, ...this.splitMeshes };
+  }
+
+  initTextures(callback) {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(particle, (texture) => {
+      this.particleTexture = texture;
+      callback();
+    });
   }
 
   init(instances) {
@@ -840,7 +849,7 @@ export default class GeppettoThree {
       console.log(item, loaded, total);
     };
     const loader = new THREE.OBJLoader(manager);
-    const scene = loader.parse(node.obj);
+    const scene = loader.parse(node.obj, this.particleTexture);
     const that = this;
     scene.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
@@ -879,6 +888,39 @@ export default class GeppettoThree {
             }
           });
         }
+      }
+    }
+  }
+
+  /**
+   * Change the default opacity for a given aspect. The opacity set with this command API will be persisted across different workflows, e.g. selection.
+   *
+   * @param {String}
+   *            instancePath - Instance path of aspect to change opacity for
+   */
+  setOpacity(instancePath, opacity) {
+    if (!this.hasInstance(instancePath)) {
+      return;
+    }
+    const mesh = this.meshes[instancePath];
+    if (mesh != undefined) {
+      mesh.defaultOpacity = opacity;
+      if (opacity == 1) {
+        mesh.traverse(function (object) {
+          if (Object.prototype.hasOwnProperty.call(object, 'material')) {
+            object.material.transparent = false;
+            object.material.opacity = 1;
+            object.material.defaultOpacity = 1;
+          }
+        });
+      } else {
+        mesh.traverse(function (object) {
+          if (Object.prototype.hasOwnProperty.call(object, 'material')) {
+            object.material.transparent = true;
+            object.material.opacity = opacity;
+            object.material.defaultOpacity = opacity;
+          }
+        });
       }
     }
   }
