@@ -22,7 +22,8 @@ const models = [
       colorMap: {
         network_CA1PyramidalCell: '0x009295',
       },
-      position: '-5 -5 -40',
+      position: '5 12 -20',
+      rotation: '0 0 90',
     },
     imageID: '#ca1',
     instances: ['network_CA1PyramidalCell'],

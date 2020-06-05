@@ -7,6 +7,7 @@ import ArrayInstance from '@geppettoengine/geppetto-client/js/geppettoModel/mode
 import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
+import 'aframe-environment-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
@@ -258,7 +259,14 @@ class Canvas extends Component {
   }
 
   render() {
-    const { sceneBackground, model, instances, id, position } = this.props;
+    const {
+      sceneBackground,
+      model,
+      instances,
+      id,
+      position,
+      rotation,
+    } = this.props;
     const { loadedTextures } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
@@ -286,9 +294,11 @@ class Canvas extends Component {
           />
         </a-assets>
 
+        <a-entity environment="preset: default" />
+
         <a-entity
           id={cameraID}
-          position="0 1.6 0"
+          position="0 5 0"
           thumbstick-controls
           scroll-movement
         >
@@ -304,6 +314,7 @@ class Canvas extends Component {
         <a-entity
           ref={this.canvasRef}
           position={position}
+          rotation={rotation}
           scale="0.1, 0.1 0.1"
           id={modelID}
           rotatable={`id: ${id}`}
@@ -330,6 +341,7 @@ Canvas.defaultProps = {
   colorMap: {},
   opacityMap: {},
   position: '-20 -20 -80',
+  rotation: '0 0 0',
   sceneBackground: 'color: #ECECEC',
   handleHover: () => {},
   handleClick: () => {},
@@ -344,6 +356,7 @@ Canvas.propTypes = {
   colorMap: PropTypes.object,
   opacityMap: PropTypes.object,
   position: PropTypes.string,
+  rotation: PropTypes.string,
   sceneBackground: PropTypes.string,
   handleHover: PropTypes.func,
   handleClick: PropTypes.func,

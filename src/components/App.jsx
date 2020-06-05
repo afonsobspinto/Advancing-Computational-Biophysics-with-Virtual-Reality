@@ -43,10 +43,11 @@ export default class App extends Component {
   render() {
     const { selectedModel } = this.state;
     const {
-      colorMap,
       sceneBackground,
-      position,
+      colorMap,
       opacityMap,
+      position,
+      rotation,
     } = selectedModel.props;
 
     return (
@@ -64,6 +65,7 @@ export default class App extends Component {
               colorMap={colorMap}
               opacityMap={opacityMap}
               position={position}
+              rotation={rotation}
               sceneBackground={sceneBackground}
               handleClick={this.handleClick}
               handleHover={this.handleHover}
