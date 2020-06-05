@@ -15,6 +15,7 @@ import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png
 import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
+import '../aframe/scroll-movement';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -285,7 +286,12 @@ class Canvas extends Component {
           />
         </a-assets>
 
-        <a-entity id={cameraID} position="0 1.6 0" thumbstick-controls>
+        <a-entity
+          id={cameraID}
+          position="0 1.6 0"
+          thumbstick-controls
+          scroll-movement
+        >
           <a-camera
             cursor="rayOrigin: mouse"
             raycaster="objects: .collidable"
