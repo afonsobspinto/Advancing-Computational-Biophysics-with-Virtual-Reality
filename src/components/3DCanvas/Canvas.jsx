@@ -12,7 +12,7 @@ import 'aframe-slice9-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
 import Menu from '../menu/Menu';
-import mainMenu from '../menu/mainMenu';
+import { mainMenu, VGMainMenu } from '../menu/mainMenu';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
@@ -38,7 +38,7 @@ class Canvas extends Component {
     this.state = {
       loadedTextures: false,
       visualGroups: false,
-      currentMenu: 'main',
+      currentMenu: MAIN_MENU.id,
     };
     this.geppettoThree = new GeppettoThree(threshold);
     this.canvasRef = React.createRef();
@@ -93,6 +93,7 @@ class Canvas extends Component {
     const { instances } = this.props;
     if (instances !== nextProps.instances) {
       this.geppettoThree.init(nextProps.instances);
+      this.setState({ visualGroups: false });
     }
     return true;
   }
@@ -273,6 +274,7 @@ class Canvas extends Component {
       const lastMenu = this.menuHistory.pop();
       this.setState({ currentMenu: lastMenu });
     } else if (event === VISUAL_GROUPS) {
+      // eslint-disable-next-line no-eval
       eval(
         `network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()[${parseInt(
           detail,
@@ -322,6 +324,12 @@ class Canvas extends Component {
     let back = false;
     if (currentMenu === MAIN_MENU.id) {
       menu = mainMenu;
+      for (const m of models) {
+        if (m.name === model && m.visualGroups) {
+          menu = VGMainMenu;
+          break;
+        }
+      }
       menuTitle = MAIN_MENU.title;
     } else if (currentMenu === SET_PROJECT_MENU.id) {
       const projectMenu = [];
