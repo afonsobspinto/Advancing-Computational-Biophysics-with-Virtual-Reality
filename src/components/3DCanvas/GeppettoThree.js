@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable eqeqeq */
-import particle from '../../../assets/3dparticle.png';
+import particle from '../../../assets/particle.png';
 
 require('./OBJLoader');
 
@@ -690,7 +690,7 @@ export default class GeppettoThree {
     const textureLoader = new THREE.TextureLoader();
     const material = new THREE.PointsMaterial({
       size: 2,
-      map: textureLoader.load('../../../assets/3dparticle.png'),
+      map: textureLoader.load('../../../assets/particle.png'),
       blending: THREE.NormalBlending,
       depthTest: true,
       transparent: true,

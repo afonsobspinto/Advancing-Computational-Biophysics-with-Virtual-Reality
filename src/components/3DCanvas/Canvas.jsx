@@ -8,8 +8,11 @@ import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
 import 'aframe-environment-component';
+import 'aframe-slice9-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
+import Menu from '../menu/Menu';
+import { mainMenu, VGMainMenu } from '../menu/mainMenu';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
@@ -17,6 +20,13 @@ import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
+import models from '../../models/models';
+import { MENU_CLICK, MODEL_CHANGED, BACK_MENU, VISUAL_GROUPS } from '../Events';
+import {
+  MAIN_MENU,
+  SET_PROJECT_MENU,
+  VISUAL_GROUPS_MENU,
+} from '../menu/menuStates';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -28,6 +38,7 @@ class Canvas extends Component {
     this.state = {
       loadedTextures: false,
       visualGroups: false,
+      currentMenu: MAIN_MENU.id,
     };
     this.geppettoThree = new GeppettoThree(threshold);
     this.canvasRef = React.createRef();
@@ -36,12 +47,15 @@ class Canvas extends Component {
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleMenuClick = this.handleMenuClick.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
     this.threeMeshes = {};
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
     this.geppettoThree.initTextures(this.handleLoadedTextures);
+    this.isReady = false;
+    this.menuHistory = [];
   }
 
   componentDidMount() {
@@ -51,8 +65,9 @@ class Canvas extends Component {
       this.handleHoverLeave
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
+    this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
     // TODO: remove this workaround
-    this.sceneRef.current.addEventListener('visual_groups', (evt) =>
+    this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
       this.showVisualGroups(
         evt.detail.groups,
         evt.detail.mode,
@@ -78,6 +93,7 @@ class Canvas extends Component {
     const { instances } = this.props;
     if (instances !== nextProps.instances) {
       this.geppettoThree.init(nextProps.instances);
+      this.setState({ visualGroups: false });
     }
     return true;
   }
@@ -245,6 +261,29 @@ class Canvas extends Component {
     }
   }
 
+  handleMenuClick(evt) {
+    const { handleModelChange } = this.props;
+    const { currentMenu } = this.state;
+    const { event, detail } = evt.detail;
+    if (event === MENU_CLICK) {
+      this.menuHistory.push(currentMenu);
+      this.setState({ currentMenu: detail });
+    } else if (event === MODEL_CHANGED) {
+      handleModelChange(detail);
+    } else if (event === BACK_MENU) {
+      const lastMenu = this.menuHistory.pop();
+      this.setState({ currentMenu: lastMenu });
+    } else if (event === VISUAL_GROUPS) {
+      // eslint-disable-next-line no-eval
+      eval(
+        `network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()[${parseInt(
+          detail,
+          10
+        )}].show(true)`
+      );
+    }
+  }
+
   /**
    * Activates a visual group
    * @param visualGroup
@@ -267,14 +306,64 @@ class Canvas extends Component {
       position,
       rotation,
     } = this.props;
-    const { loadedTextures } = this.state;
+    const { loadedTextures, currentMenu } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
 
     if (loadedTextures) {
-      this.geppettoThree.init(instances);
+      if (!this.isReady) {
+        this.geppettoThree.init(instances);
+        this.isReady = true;
+      }
       this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+    }
+
+    let menu;
+    let menuTitle;
+    let back = false;
+    if (currentMenu === MAIN_MENU.id) {
+      menu = mainMenu;
+      for (const m of models) {
+        if (m.name === model && m.visualGroups) {
+          menu = VGMainMenu;
+          break;
+        }
+      }
+      menuTitle = MAIN_MENU.title;
+    } else if (currentMenu === SET_PROJECT_MENU.id) {
+      const projectMenu = [];
+      for (const m of models) {
+        if (m.name !== model) {
+          projectMenu.push({
+            text: m.name,
+            color: m.color,
+            event: MODEL_CHANGED,
+            evtDetail: m.name,
+          });
+        }
+      }
+      menu = projectMenu;
+      menuTitle = SET_PROJECT_MENU.title;
+      back = true;
+    } else if (currentMenu === VISUAL_GROUPS_MENU.id) {
+      const visualGroupsMenu = [];
+      // eslint-disable-next-line no-eval
+      const visualGroups = eval(
+        'network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()'
+      );
+      for (let i = 0; i < visualGroups.length; i++) {
+        const vg = visualGroups[i];
+        visualGroupsMenu.push({
+          text: vg.wrappedObj.name,
+          color: '#48BAEA',
+          event: VISUAL_GROUPS,
+          evtDetail: i,
+        });
+      }
+      menu = visualGroupsMenu;
+      menuTitle = VISUAL_GROUPS_MENU.title;
+      back = true;
     }
 
     return (
@@ -292,6 +381,34 @@ class Canvas extends Component {
             src={AuditoryCortex}
             alt="auditory cortex thumbnail"
           />
+          <img
+            id="sliceImg"
+            alt="slice_image"
+            src="https://cdn.glitch.com/0ddef241-2c1a-4bc2-8d47-58192c718908%2Fslice.png?1557308835598"
+            crossOrigin="true"
+          />
+
+          <a-mixin
+            id="buttonBackground"
+            mixin="slice"
+            slice9="width: 1.3; height: 0.3; color: #030303"
+          />
+          <a-mixin
+            id="buttonText"
+            mixin="font"
+            text="align: center; width: 2.5; zOffset: 0.01; color: #333"
+          />
+
+          <a-mixin
+            id="button"
+            mixin="buttonBackground buttonText"
+            class="collidable"
+          />
+
+          <a-mixin
+            id="slice"
+            slice9="color: #050505; transparent: true; opacity: 0.9; src: #sliceImg; left: 50; right: 52; top: 50; bottom: 52; padding: 0.15"
+          />
         </a-assets>
 
         <a-entity environment="preset: default" />
@@ -308,7 +425,7 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          {/* <ShowcaseGallery model={model} /> */}
+          <Menu id={id} buttons={menu} menuTitle={menuTitle} back={back} />
         </a-entity>
 
         <a-entity
@@ -346,6 +463,7 @@ Canvas.defaultProps = {
   handleHover: () => {},
   handleClick: () => {},
   handleHoverLeave: () => {},
+  handleModelChange: () => {},
 };
 
 Canvas.propTypes = {
@@ -361,6 +479,7 @@ Canvas.propTypes = {
   handleHover: PropTypes.func,
   handleClick: PropTypes.func,
   handleHoverLeave: PropTypes.func,
+  handleModelChange: PropTypes.func,
 };
 
 export default Canvas;
