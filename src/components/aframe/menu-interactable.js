@@ -1,19 +1,28 @@
-function clicked(target, detail) {
-  const event = new CustomEvent('model_changed', { detail: detail });
-  target.dispatchEvent(event);
+function clicked(target, event, detail) {
+  const evt = new CustomEvent(event, { detail: detail });
+  target.dispatchEvent(evt);
 }
 
 AFRAME.registerComponent('menu-interactable', {
+  schema: {
+    id: { type: 'string' },
+    event: { type: 'string' },
+    evt_detail: { type: 'string' },
+  },
   init: function () {
     const { el } = this;
-    this.canvasContainer = document.getElementById('CanvasContainer');
+    // eslint-disable-next-line camelcase
+    const { id, event, evt_detail } = this.data;
+    this.scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('triggerdown', () => {
-      clicked(this.canvasContainer, el.title);
+      clicked(this.scene, event, evt_detail);
     });
 
     el.addEventListener('click', () => {
-      clicked(this.canvasContainer, el.title);
+      clicked(this.scene, event, evt_detail);
     });
   },
+
+  // TODO: Remove event listeners
 });

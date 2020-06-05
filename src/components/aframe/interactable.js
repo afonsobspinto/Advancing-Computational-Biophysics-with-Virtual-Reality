@@ -28,6 +28,7 @@ AFRAME.registerComponent('interactable', {
 
     el.addEventListener('click', () => {
       clicked(this.scene, el);
+      console.log('click');
     });
   },
 });

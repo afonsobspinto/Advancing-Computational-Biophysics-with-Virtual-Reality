@@ -8,8 +8,11 @@ import Type from '@geppettoengine/geppetto-client/js/geppettoModel/model/Type';
 import Variable from '@geppettoengine/geppetto-client/js/geppettoModel/model/Variable';
 import 'aframe';
 import 'aframe-environment-component';
+import 'aframe-slice9-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
+import Menu from '../menu/Menu';
+import mainMenu from '../menu/mainMenu';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
@@ -17,6 +20,7 @@ import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
+import models from '../../models/models';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -28,6 +32,7 @@ class Canvas extends Component {
     this.state = {
       loadedTextures: false,
       visualGroups: false,
+      currentMenu: 'main',
     };
     this.geppettoThree = new GeppettoThree(threshold);
     this.canvasRef = React.createRef();
@@ -36,6 +41,7 @@ class Canvas extends Component {
     this.handleHover = this.handleHover.bind(this);
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleMenuClick = this.handleMenuClick.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
     this.threeMeshes = {};
@@ -51,6 +57,7 @@ class Canvas extends Component {
       this.handleHoverLeave
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
+    this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
     // TODO: remove this workaround
     this.sceneRef.current.addEventListener('visual_groups', (evt) =>
       this.showVisualGroups(
@@ -245,6 +252,10 @@ class Canvas extends Component {
     }
   }
 
+  handleMenuClick(evt) {
+    this.setState({ currentMenu: evt.detail });
+  }
+
   /**
    * Activates a visual group
    * @param visualGroup
@@ -267,7 +278,7 @@ class Canvas extends Component {
       position,
       rotation,
     } = this.props;
-    const { loadedTextures } = this.state;
+    const { loadedTextures, currentMenu } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
@@ -275,6 +286,27 @@ class Canvas extends Component {
     if (loadedTextures) {
       this.geppettoThree.init(instances);
       this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
+    }
+
+    let menu;
+    let menuTitle;
+    if (currentMenu === 'main') {
+      menu = mainMenu;
+      menuTitle = 'Main Menu';
+    } else if (currentMenu === 'set_project') {
+      const projectMenu = [];
+      for (const m of models) {
+        if (m.name !== model) {
+          projectMenu.push({
+            text: m.name,
+            color: m.color,
+            event: 'model_changed',
+            evt_detail: m.name,
+          });
+        }
+      }
+      menu = projectMenu;
+      menuTitle = 'Choose Project';
     }
 
     return (
@@ -292,6 +324,40 @@ class Canvas extends Component {
             src={AuditoryCortex}
             alt="auditory cortex thumbnail"
           />
+          <img
+            id="sliceImg"
+            alt="slice_image"
+            src="https://cdn.glitch.com/0ddef241-2c1a-4bc2-8d47-58192c718908%2Fslice.png?1557308835598"
+            crossOrigin="true"
+          />
+
+          <a-mixin
+            id="buttonBackground"
+            mixin="slice"
+            slice9="width: 1.3; height: 0.3; color: #030303"
+          />
+          <a-mixin
+            id="buttonText"
+            mixin="font"
+            text="align: center; width: 2.5; zOffset: 0.01; color: #333"
+          />
+
+          <a-mixin
+            id="button"
+            mixin="buttonBackground buttonText"
+            class="collidable"
+          />
+
+          <a-mixin
+            id="slice"
+            slice9="color: #050505; transparent: true; opacity: 0.9; src: #sliceImg; left: 50; right: 52; top: 50; bottom: 52; padding: 0.15"
+          />
+
+          <a-mixin
+            id="menuArrow"
+            geometry="primitive: plane; width: 0.15; height: 0.15"
+            material="src: #pageIconImg; shader: flat; transparent: true"
+          />
         </a-assets>
 
         <a-entity environment="preset: default" />
@@ -308,7 +374,7 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          {/* <ShowcaseGallery model={model} /> */}
+          <Menu id={id} buttons={menu} menuTitle={menuTitle} />
         </a-entity>
 
         <a-entity

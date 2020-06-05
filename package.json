@@ -49,6 +49,8 @@
     "aframe-environment-component": "^2.0.0",
     "aframe-layout-component": "^5.3.0",
     "aframe-log-component": "^1.0.7",
+    "aframe-render-order-component": "^1.1.0",
+    "aframe-slice9-component": "^1.0.0",
     "aframe-template-component": "^3.2.1",
     "file-saver": "^2.0.2",
     "jszip": "^3.4.0",

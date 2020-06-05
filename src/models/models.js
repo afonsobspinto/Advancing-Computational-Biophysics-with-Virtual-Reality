@@ -15,6 +15,7 @@ const models = [
     },
     imageID: '#auditory_cortex',
     instances: ['acnet2'],
+    color: '#F85333',
   },
   {
     name: 'ca1_pyramidal_cell',
@@ -28,6 +29,7 @@ const models = [
     },
     imageID: '#ca1',
     instances: ['network_CA1PyramidalCell'],
+    color: '#48BAEA',
   },
   {
     name: 'vfb',
@@ -49,7 +51,7 @@ const models = [
         VFB_00030840: 0.3,
         VFB_00030632: 0.3,
       },
-      position: '0 2 -50',
+      position: '-20 2 -50',
     },
     imageID: '#vfb',
     instances: [
@@ -65,6 +67,7 @@ const models = [
       // 'VFB_00025007',
       // 'VFB_00101383',
     ],
+    color: '#e0cb49',
   },
 ];
 
