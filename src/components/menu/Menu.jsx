@@ -4,12 +4,12 @@ import 'aframe';
 import 'aframe-template-component';
 import 'aframe-layout-component';
 import 'aframe-slice9-component';
-
 import '../aframe/menu-interactable';
+import { BACK_MENU } from '../Events';
 
 class Menu extends Component {
   render() {
-    const { buttons, menuTitle, id } = this.props;
+    const { buttons, menuTitle, id, back } = this.props;
 
     const buttonsMap = [];
 
@@ -22,6 +22,19 @@ class Menu extends Component {
       yPos -= 0.5;
     }
 
+    // TODO: Add collapse, button controller to bring back?
+    const arrowButton = back ? (
+      <a-triangle
+        color="#FFF"
+        class="collidable"
+        mixin="button"
+        position="-0.8 2.15 0.02"
+        rotation="0 0 90"
+        scale="0.15 0.15 0.15"
+        menu-interactable={`id: ${id}; event: ${BACK_MENU}; evtDetail: ${null}`}
+      />
+    ) : null;
+
     return (
       <a-entity id="entity_menu" position="4 1.6 -3" rotation="0 0 0">
         <a-entity
@@ -29,6 +42,8 @@ class Menu extends Component {
           mixin="slice"
           slice9="height: 5; width: 2; color: #171717"
         />
+
+        {arrowButton}
 
         <a-entity
           id="title"
@@ -52,12 +67,15 @@ class Menu extends Component {
   }
 }
 
-Menu.defaultProps = {};
+Menu.defaultProps = {
+  back: false,
+};
 
 Menu.propTypes = {
   id: PropTypes.string.isRequired,
   buttons: PropTypes.array.isRequired,
   menuTitle: PropTypes.string.isRequired,
+  back: PropTypes.bool,
 };
 
 export default Menu;

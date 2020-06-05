@@ -21,7 +21,8 @@ import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import models from '../../models/models';
-import { MENU_CLICK, MODEL_CHANGED, SET_PROJECT } from '../Events';
+import { MENU_CLICK, MODEL_CHANGED, BACK_MENU } from '../Events';
+import { MAIN_MENU, SET_PROJECT_MENU } from '../menu/menuStates';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -49,6 +50,7 @@ class Canvas extends Component {
     this.selectedMeshes = {};
     this.hoveredMeshes = {};
     this.geppettoThree.initTextures(this.handleLoadedTextures);
+    this.menuHistory = [];
   }
 
   componentDidMount() {
@@ -255,11 +257,16 @@ class Canvas extends Component {
 
   handleMenuClick(evt) {
     const { handleModelChange } = this.props;
+    const { currentMenu } = this.state;
     const { event, detail } = evt.detail;
     if (event === MENU_CLICK) {
+      this.menuHistory.push(currentMenu);
       this.setState({ currentMenu: detail });
     } else if (event === MODEL_CHANGED) {
       handleModelChange(detail);
+    } else if (event === BACK_MENU) {
+      const lastMenu = this.menuHistory.pop();
+      this.setState({ currentMenu: lastMenu });
     }
   }
 
@@ -297,10 +304,11 @@ class Canvas extends Component {
 
     let menu;
     let menuTitle;
-    if (currentMenu === 'main') {
+    let back = false;
+    if (currentMenu === MAIN_MENU.id) {
       menu = mainMenu;
-      menuTitle = 'Main Menu';
-    } else if (currentMenu === SET_PROJECT) {
+      menuTitle = MAIN_MENU.title;
+    } else if (currentMenu === SET_PROJECT_MENU.id) {
       const projectMenu = [];
       for (const m of models) {
         if (m.name !== model) {
@@ -313,7 +321,8 @@ class Canvas extends Component {
         }
       }
       menu = projectMenu;
-      menuTitle = 'Choose Project';
+      menuTitle = SET_PROJECT_MENU.title;
+      back = true;
     }
 
     return (
@@ -359,12 +368,6 @@ class Canvas extends Component {
             id="slice"
             slice9="color: #050505; transparent: true; opacity: 0.9; src: #sliceImg; left: 50; right: 52; top: 50; bottom: 52; padding: 0.15"
           />
-
-          <a-mixin
-            id="menuArrow"
-            geometry="primitive: plane; width: 0.15; height: 0.15"
-            material="src: #pageIconImg; shader: flat; transparent: true"
-          />
         </a-assets>
 
         <a-entity environment="preset: default" />
@@ -381,7 +384,7 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          <Menu id={id} buttons={menu} menuTitle={menuTitle} />
+          <Menu id={id} buttons={menu} menuTitle={menuTitle} back={back} />
         </a-entity>
 
         <a-entity

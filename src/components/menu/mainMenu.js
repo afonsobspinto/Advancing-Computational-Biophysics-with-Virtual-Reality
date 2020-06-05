@@ -1,9 +1,10 @@
-import { MENU_CLICK, SET_PROJECT } from '../Events';
+import { MENU_CLICK } from '../Events';
+import { SET_PROJECT_MENU } from './menuStates';
 
 const mainMenu = [
   {
     event: MENU_CLICK,
-    evtDetail: SET_PROJECT,
+    evtDetail: SET_PROJECT_MENU.id,
     text: 'Set Project',
     color: '#F85333',
   },
