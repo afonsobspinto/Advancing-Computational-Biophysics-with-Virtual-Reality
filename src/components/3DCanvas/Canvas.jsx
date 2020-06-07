@@ -21,12 +21,20 @@ import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import models from '../../models/models';
-import { MENU_CLICK, MODEL_CHANGED, BACK_MENU, VISUAL_GROUPS } from '../Events';
+import {
+  MENU_CLICK,
+  MODEL_CHANGED,
+  BACK_MENU,
+  VISUAL_GROUPS,
+  RUN_SIMULATION,
+} from '../Events';
 import {
   MAIN_MENU,
   SET_PROJECT_MENU,
   VISUAL_GROUPS_MENU,
+  NEW_DATA_MENU,
 } from '../menu/menuStates';
+import runSimulation from '../../utilities/GeppettoSimulation/GeppettoSimulation';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -281,6 +289,9 @@ class Canvas extends Component {
           10
         )}].show(true)`
       );
+    } else if (event === RUN_SIMULATION) {
+      runSimulation();
+      this.setState({ currentMenu: MAIN_MENU.id });
     }
   }
 
@@ -364,8 +375,18 @@ class Canvas extends Component {
       menu = visualGroupsMenu;
       menuTitle = VISUAL_GROUPS_MENU.title;
       back = true;
+    } else if (currentMenu === NEW_DATA_MENU.id) {
+      menu = [
+        {
+          text: 'Pipette',
+          color: '#e0cb49',
+          event: RUN_SIMULATION,
+          evtDetail: null,
+        },
+      ];
+      menuTitle = NEW_DATA_MENU.title;
+      back = true;
     }
-
     return (
       <a-scene
         stats

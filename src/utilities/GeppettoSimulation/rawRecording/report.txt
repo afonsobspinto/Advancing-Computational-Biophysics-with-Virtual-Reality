@@ -1,0 +1,10 @@
+# Report of running simulation with NEURON -- VERSION 7.6.2 master (f5a1284) 2018-08-15
+Simulator=NEURON
+SimulatorVersion=NEURON -- VERSION 7.6.2 master (f5a1284) 2018-08-15
+SimulationFile=/home/virgo/geppettoTmp/RUN/projects/1546/3495/network_CA1PyramidalCell/NEURONModel_05062020_100229/main_script.py
+PythonVersion=2.7.12 (default, Oct  8 2019, 14:14:10)  [GCC 5.4.0 20160609]
+NeuroMLExportVersion=1.5.5
+StartTime=2020-06-05 10:02:37
+SetupTime=0.903738975525
+RealSimulationTime=1.75190806389
+SimulationSaveTime=0.71967291832

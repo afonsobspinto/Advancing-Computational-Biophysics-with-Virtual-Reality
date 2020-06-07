@@ -36,6 +36,17 @@ module.exports = {
           loader: 'url-loader',
         },
       },
+      {
+        test: /\.dat$/i,
+        use: [
+          {
+            loader: 'raw-loader',
+            options: {
+              esModule: false,
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
