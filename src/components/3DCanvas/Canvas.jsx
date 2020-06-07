@@ -21,12 +21,24 @@ import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import models from '../../models/models';
-import { MENU_CLICK, MODEL_CHANGED, BACK_MENU, VISUAL_GROUPS } from '../Events';
+import {
+  MENU_CLICK,
+  MODEL_CHANGED,
+  BACK_MENU,
+  VISUAL_GROUPS,
+  RUN_SIMULATION,
+} from '../Events';
 import {
   MAIN_MENU,
   SET_PROJECT_MENU,
   VISUAL_GROUPS_MENU,
+  NEW_DATA_MENU,
 } from '../menu/menuStates';
+import {
+  getSimulationData,
+  getVoltageColor,
+} from '../../utilities/GeppettoSimulation/GeppettoSimulation';
+import ColorController from './ColorController';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -39,8 +51,12 @@ class Canvas extends Component {
       loadedTextures: false,
       visualGroups: false,
       currentMenu: MAIN_MENU.id,
+      simulation: false,
+      time: 0,
+      simulationData: null,
     };
     this.geppettoThree = new GeppettoThree(threshold);
+    this.colorController = new ColorController(this.geppettoThree);
     this.canvasRef = React.createRef();
     this.sceneRef = React.createRef();
     this.handleLoadedTextures = this.handleLoadedTextures.bind(this);
@@ -56,6 +72,7 @@ class Canvas extends Component {
     this.geppettoThree.initTextures(this.handleLoadedTextures);
     this.isReady = false;
     this.menuHistory = [];
+    this.timer = null;
   }
 
   componentDidMount() {
@@ -100,7 +117,7 @@ class Canvas extends Component {
 
   componentDidUpdate() {
     const { colorMap, opacityMap } = this.props;
-    const { visualGroups } = this.state;
+    const { visualGroups, time, simulationData, simulation } = this.state;
     if (!visualGroups) {
       if (colorMap !== {}) {
         for (const path in colorMap) {
@@ -114,6 +131,18 @@ class Canvas extends Component {
       }
     }
     this.setEntityMeshes();
+    if (simulation) {
+      if (time === Object.keys(simulationData).length - 1) {
+        // eslint-disable-next-line react/no-did-update-set-state
+        this.setState({
+          simulation: false,
+          visualGroups: false,
+          simulationData: null,
+          time: 0,
+        });
+        clearInterval(this.timer);
+      }
+    }
   }
 
   setColor(path, color) {
@@ -281,6 +310,23 @@ class Canvas extends Component {
           10
         )}].show(true)`
       );
+    } else if (event === RUN_SIMULATION) {
+      this.colorController.addColorFunction(
+        GEPPETTO.ModelFactory.instances.getInstance(
+          GEPPETTO.ModelFactory.getAllPotentialInstancesEndingWith('.v')
+        ),
+        getVoltageColor
+      );
+      this.timer = setInterval(() => {
+        const { time } = this.state;
+        this.setState({ time: time + 1 });
+      }, 2);
+      this.setState({
+        currentMenu: MAIN_MENU.id,
+        simulation: true,
+        visualGroups: true,
+        simulationData: getSimulationData(),
+      });
     }
   }
 
@@ -306,7 +352,13 @@ class Canvas extends Component {
       position,
       rotation,
     } = this.props;
-    const { loadedTextures, currentMenu } = this.state;
+    const {
+      loadedTextures,
+      currentMenu,
+      simulation,
+      time,
+      simulationData,
+    } = this.state;
     const sceneID = `${id}_scene`;
     const cameraID = `${id}_camera`;
     const modelID = `${id}_model`;
@@ -364,6 +416,29 @@ class Canvas extends Component {
       menu = visualGroupsMenu;
       menuTitle = VISUAL_GROUPS_MENU.title;
       back = true;
+    } else if (currentMenu === NEW_DATA_MENU.id) {
+      menu = [
+        {
+          text: 'Pipette',
+          color: '#e0cb49',
+          event: RUN_SIMULATION,
+          evtDetail: null,
+        },
+      ];
+      menuTitle = NEW_DATA_MENU.title;
+      back = true;
+    }
+
+    if (simulation) {
+      const simulationTime = Object.keys(simulationData)[time];
+      for (const v of Object.keys(simulationData[simulationTime])) {
+        const variable = v.substring(0, v.lastIndexOf('.'));
+        this.colorController.colorInstance(
+          variable,
+          getVoltageColor,
+          parseFloat(simulationData[simulationTime][v])
+        );
+      }
     }
 
     return (
