@@ -298,6 +298,8 @@ class Canvas extends Component {
       this.menuHistory.push(currentMenu);
       this.setState({ currentMenu: detail });
     } else if (event === MODEL_CHANGED) {
+      const lastMenu = this.menuHistory.pop();
+      this.setState({ currentMenu: lastMenu });
       handleModelChange(detail);
     } else if (event === BACK_MENU) {
       const lastMenu = this.menuHistory.pop();
@@ -311,12 +313,16 @@ class Canvas extends Component {
         )}].show(true)`
       );
     } else if (event === RUN_SIMULATION) {
+      const t0 = performance.now();
+
       this.colorController.addColorFunction(
         GEPPETTO.ModelFactory.instances.getInstance(
           GEPPETTO.ModelFactory.getAllPotentialInstancesEndingWith('.v')
         ),
         getVoltageColor
       );
+      const t1 = performance.now();
+      console.log(`Call to addColorFunction took ${t1 - t0} milliseconds.`);
       this.timer = setInterval(() => {
         const { time } = this.state;
         this.setState({ time: time + 1 });
