@@ -5,6 +5,8 @@ import 'aframe-template-component';
 import 'aframe-layout-component';
 import 'aframe-slice9-component';
 import '../aframe/menu-interactable';
+import '../aframe/lookAtCamera';
+
 import { BACK_MENU } from '../Events';
 
 class Menu extends Component {
@@ -40,7 +42,7 @@ class Menu extends Component {
     ) : null;
 
     return (
-      <a-entity id="entity_menu" position="4 1.6 -3" rotation="0 0 0">
+      <a-entity id="entity_menu" position="4 1.6 -3" lookAtCamera={`id: ${id}`}>
         <a-entity
           id="menuBackground"
           mixin="slice"
