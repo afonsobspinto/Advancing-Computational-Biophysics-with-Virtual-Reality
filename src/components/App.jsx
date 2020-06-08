@@ -9,7 +9,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedModel: models[1],
+      selectedModel: models[0],
     };
     const { selectedModel } = this.state;
     GEPPETTO.Manager.loadModel(selectedModel.model);
@@ -24,6 +24,11 @@ export default class App extends Component {
   handleModelChange(newModel) {
     for (const model of models) {
       if (model.name === newModel) {
+        GEPPETTO.ModelFactory = null;
+        // eslint-disable-next-line global-require
+        require('@geppettoengine/geppetto-client/js/geppettoModel/ModelFactory').default(
+          GEPPETTO
+        );
         GEPPETTO.Manager.loadModel(model.model);
         this.instances = [];
         model.instances.forEach((instance) =>

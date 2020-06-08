@@ -447,6 +447,7 @@ class Canvas extends Component {
         id={sceneID}
         ref={this.sceneRef}
         background={sceneBackground}
+        loading-screen="dotsColor: red; backgroundColor: black"
       >
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
