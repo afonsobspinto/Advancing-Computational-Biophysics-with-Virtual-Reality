@@ -17,6 +17,7 @@ AFRAME.registerComponent('extended-laser-controls', {
 
     const camera = document.getElementById(`${id}_camera`);
     const model = document.getElementById(`${id}_model`);
+    const scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('gripdown', () => {
       emitEvent('gripdown', raycaster);
@@ -40,8 +41,8 @@ AFRAME.registerComponent('extended-laser-controls', {
       const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
       camera.dispatchEvent(event);
     });
-    el.addEventListener(COLLAPSE_MENU, () => {
-      scene.emit(COLLAPSE_MENU);
-    });
+    // el.addEventListener(COLLAPSE_MENU, () => {
+    //   scene.emit(COLLAPSE_MENU);
+    // });
   },
 });

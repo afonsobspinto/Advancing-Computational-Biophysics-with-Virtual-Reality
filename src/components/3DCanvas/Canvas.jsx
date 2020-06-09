@@ -83,7 +83,7 @@ class Canvas extends Component {
     document.addEventListener('keypress', this.handleMenuCollapse);
     this.sceneRef.current.addEventListener(
       COLLAPSE_MENU,
-      () => this.handleMenuCollapse
+      this.handleMenuCollapse
     );
     // TODO: remove this workaround
     this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
