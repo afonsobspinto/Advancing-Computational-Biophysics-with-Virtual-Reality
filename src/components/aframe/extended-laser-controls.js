@@ -1,3 +1,5 @@
+import { COLLAPSE_MENU } from '../Events';
+
 function emitEvent(event, raycaster) {
   if (raycaster.intersectedEls.length > 0) {
     raycaster.intersectedEls[0].emit(event);
@@ -37,6 +39,9 @@ AFRAME.registerComponent('extended-laser-controls', {
     el.addEventListener('thumbstickmoved', (evt) => {
       const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
       camera.dispatchEvent(event);
+    });
+    el.addEventListener(COLLAPSE_MENU, () => {
+      scene.emit(COLLAPSE_MENU);
     });
   },
 });

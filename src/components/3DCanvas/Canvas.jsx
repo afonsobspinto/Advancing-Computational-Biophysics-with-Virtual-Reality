@@ -26,6 +26,7 @@ import {
   BACK_MENU,
   VISUAL_GROUPS,
   RUN_SIMULATION,
+  COLLAPSE_MENU,
 } from '../Events';
 
 import {
@@ -45,6 +46,7 @@ class Canvas extends Component {
       loadedTextures: false,
       visualGroups: false,
       currentMenu: MAIN_MENU.id,
+      isMenuVisible: true,
       simulation: false,
       time: 0,
       simulationData: null,
@@ -58,6 +60,7 @@ class Canvas extends Component {
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleMenuCollapse = this.handleMenuCollapse.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
     this.threeMeshes = {};
@@ -77,6 +80,11 @@ class Canvas extends Component {
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
     this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
+    document.addEventListener('keypress', this.handleMenuCollapse);
+    this.sceneRef.current.addEventListener(
+      COLLAPSE_MENU,
+      () => this.handleMenuCollapse
+    );
     // TODO: remove this workaround
     this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
       this.showVisualGroups(
@@ -255,6 +263,13 @@ class Canvas extends Component {
     handleHoverLeave(evt, false);
   }
 
+  handleMenuCollapse(evt) {
+    if (evt.keyCode == undefined || evt.keyCode === 109) {
+      const { isMenuVisible } = this.state;
+      this.setState({ isMenuVisible: !isMenuVisible });
+    }
+  }
+
   handleClick(evt) {
     const { handleClick } = this.props;
     if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
@@ -355,6 +370,7 @@ class Canvas extends Component {
     const {
       loadedTextures,
       currentMenu,
+      isMenuVisible,
       simulation,
       time,
       simulationData,
@@ -443,7 +459,9 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          <Menu id={id} currentMenu={currentMenu} currentModel={model} />
+          {isMenuVisible ? (
+            <Menu id={id} currentMenu={currentMenu} currentModel={model} />
+          ) : null}
         </a-entity>
 
         <a-entity
