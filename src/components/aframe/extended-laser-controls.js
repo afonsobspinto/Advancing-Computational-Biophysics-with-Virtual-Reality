@@ -17,16 +17,17 @@ AFRAME.registerComponent('extended-laser-controls', {
 
     const camera = document.getElementById(`${id}_camera`);
     const model = document.getElementById(`${id}_model`);
-    const scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('gripdown', () => {
+      const event = new CustomEvent('gripdown', { detail: el.id });
       emitEvent('gripdown', raycaster);
-      model.emit('gripdown');
+      model.dispatchEvent(event);
     });
 
     el.addEventListener('gripup', () => {
+      const event = new CustomEvent('gripup', { detail: el.id });
       emitEvent('gripup', raycaster);
-      model.emit('gripup');
+      model.dispatchEvent(event);
     });
 
     el.addEventListener('triggerdown', () => {
@@ -41,8 +42,5 @@ AFRAME.registerComponent('extended-laser-controls', {
       const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
       camera.dispatchEvent(event);
     });
-    // el.addEventListener(COLLAPSE_MENU, () => {
-    //   scene.emit(COLLAPSE_MENU);
-    // });
   },
 });
