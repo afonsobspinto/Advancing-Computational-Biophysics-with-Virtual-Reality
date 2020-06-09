@@ -12,7 +12,6 @@ import 'aframe-slice9-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
 import Menu from '../menu/Menu';
-import { mainMenu, VGMainMenu } from '../menu/mainMenu';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
@@ -20,7 +19,7 @@ import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
-import models from '../../models/models';
+import { MAIN_MENU } from '../menu/menuStates';
 import {
   MENU_CLICK,
   MODEL_CHANGED,
@@ -28,12 +27,7 @@ import {
   VISUAL_GROUPS,
   RUN_SIMULATION,
 } from '../Events';
-import {
-  MAIN_MENU,
-  SET_PROJECT_MENU,
-  VISUAL_GROUPS_MENU,
-  NEW_DATA_MENU,
-} from '../menu/menuStates';
+
 import {
   getSimulationData,
   getVoltageColor,
@@ -377,64 +371,6 @@ class Canvas extends Component {
       this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
     }
 
-    let menu;
-    let menuTitle;
-    let back = false;
-    if (currentMenu === MAIN_MENU.id) {
-      menu = mainMenu;
-      for (const m of models) {
-        if (m.name === model && m.visualGroups) {
-          menu = VGMainMenu;
-          break;
-        }
-      }
-      menuTitle = MAIN_MENU.title;
-    } else if (currentMenu === SET_PROJECT_MENU.id) {
-      const projectMenu = [];
-      for (const m of models) {
-        if (m.name !== model) {
-          projectMenu.push({
-            text: m.name,
-            color: m.color,
-            event: MODEL_CHANGED,
-            evtDetail: m.name,
-          });
-        }
-      }
-      menu = projectMenu;
-      menuTitle = SET_PROJECT_MENU.title;
-      back = true;
-    } else if (currentMenu === VISUAL_GROUPS_MENU.id) {
-      const visualGroupsMenu = [];
-      // eslint-disable-next-line no-eval
-      const visualGroups = eval(
-        'network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()'
-      );
-      for (let i = 0; i < visualGroups.length; i++) {
-        const vg = visualGroups[i];
-        visualGroupsMenu.push({
-          text: vg.wrappedObj.name,
-          color: '#48BAEA',
-          event: VISUAL_GROUPS,
-          evtDetail: i,
-        });
-      }
-      menu = visualGroupsMenu;
-      menuTitle = VISUAL_GROUPS_MENU.title;
-      back = true;
-    } else if (currentMenu === NEW_DATA_MENU.id) {
-      menu = [
-        {
-          text: 'Pipette',
-          color: '#e0cb49',
-          event: RUN_SIMULATION,
-          evtDetail: null,
-        },
-      ];
-      menuTitle = NEW_DATA_MENU.title;
-      back = true;
-    }
-
     if (simulation) {
       const simulationTime = Object.keys(simulationData)[time];
       for (const v of Object.keys(simulationData[simulationTime])) {
@@ -507,7 +443,7 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          <Menu id={id} buttons={menu} menuTitle={menuTitle} back={back} />
+          <Menu id={id} currentMenu={currentMenu} currentModel={model} />
         </a-entity>
 
         <a-entity

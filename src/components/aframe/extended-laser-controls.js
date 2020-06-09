@@ -6,7 +6,7 @@ function emitEvent(event, raycaster) {
 
 AFRAME.registerComponent('extended-laser-controls', {
   schema: {
-    cameraID: { type: 'string' },
+    id: { type: 'string' },
   },
   init: function () {
     const { el } = this;

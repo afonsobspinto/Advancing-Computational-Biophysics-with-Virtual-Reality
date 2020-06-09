@@ -1,11 +1,12 @@
-AFRAME.registerComponent('lookAtCamera', {
+AFRAME.registerComponent('look-at-camera', {
   schema: {
-    cameraID: { type: 'string' },
+    id: { type: 'string' },
   },
+
   tick: function () {
     const { el } = this;
     const { id } = this.data;
     const camera = document.getElementById(`${id}_camera`);
-    el.getObject3D.lookAt(camera.object3D.position);
+    el.object3D.lookAt(camera.object3D.position);
   },
 });
