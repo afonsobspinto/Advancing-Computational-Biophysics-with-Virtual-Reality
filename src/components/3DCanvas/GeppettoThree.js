@@ -75,8 +75,7 @@ export default class GeppettoThree {
       mesh.instancePath = instancePath;
       // if the model file is specifying a position for the loaded meshes then we translate them here
       if (position != null) {
-        const p = new THREE.Vector3(position.x, position.y, position.z);
-        mesh.position.set(p.x, p.y, p.z);
+        mesh.position.set(position.x, position.y, position.z);
         mesh.geometry.verticesNeedUpdate = true;
         mesh.updateMatrix();
       }

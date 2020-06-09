@@ -1,7 +1,6 @@
 export default class ColorController {
   constructor(engine) {
     this.engine = engine;
-    this.litUpInstances = [];
   }
 
   /**
@@ -12,14 +11,9 @@ export default class ColorController {
    * @param {Instance} modulation - Variable which modulates the color
    * @param {Function} colorfn - Converts time-series value to [r,g,b]
    */
-  addColorFunction(instances, colorfn) {
-    // Check if instance is instance + visualObjects or instance (hhcell.hhpop[0].soma or hhcell.hhpop[0])
-    for (let i = 0; i < instances.length; ++i) {
-      this.litUpInstances.push(instances[i]);
-    }
+  addColorFunction(instances) {
     const compositeToLit = {};
     const visualObjectsToLit = {};
-    const variables = {};
     let currentCompositePath;
 
     for (let j = 0; j < instances.length; j++) {
@@ -50,7 +44,6 @@ export default class ColorController {
       ) {
         compositeToLit[currentCompositePath] = composite;
         visualObjectsToLit[currentCompositePath] = [];
-        variables[currentCompositePath] = [];
       }
 
       if (multicompartment) {
@@ -61,17 +54,11 @@ export default class ColorController {
           }
         }
       }
-      variables[currentCompositePath].push(instances[j]);
     }
 
     for (const l in Object.keys(compositeToLit)) {
       const path = Object.keys(compositeToLit)[l];
-      this.addColorFunctionBulk(
-        compositeToLit[path],
-        visualObjectsToLit[path],
-        variables[path],
-        colorfn
-      );
+      this.addColorFunctionBulk(compositeToLit[path], visualObjectsToLit[path]);
     }
   }
 
@@ -84,43 +71,16 @@ export default class ColorController {
    * @param {Instance} modulation - Variable which modulates the color
    * @param {Function} colorfn - Converts time-series value to [r,g,b]
    */
-  addColorFunctionBulk(
-    instance,
-    visualObjects
-    // stateVariableInstances,
-    // colorfn
-  ) {
-    const modulations = [];
+  addColorFunctionBulk(instance, visualObjects) {
     if (visualObjects != null) {
       if (visualObjects.length > 0) {
         const elements = {};
         for (const voIndex in visualObjects) {
           elements[visualObjects[voIndex]] = '';
-          const path = `${instance.getInstancePath()}.${
-            visualObjects[voIndex]
-          }`;
-          if (modulations.indexOf(path) < 0) {
-            modulations.push(path);
-          }
         }
         this.engine.splitGroups(instance, elements);
-      } else if (modulations.indexOf(instance.getInstancePath()) < 0) {
-        modulations.push(instance.getInstancePath());
       }
     }
-
-    // const matchedMap = [];
-    // modulations.map(function (e, i) {
-    //   matchedMap[e] = stateVariableInstances[i];
-    // });
-
-    // for (const index in matchedMap) {
-    //   this.litUpInstances.push(matchedMap[index]);
-    //   this.addColorListener(index, matchedMap[index], colorfn);
-    // }
-
-    // // update flag
-    // this.colorFunctionSet = true;
   }
 
   /**

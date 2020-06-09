@@ -5,17 +5,90 @@ import 'aframe-template-component';
 import 'aframe-layout-component';
 import 'aframe-slice9-component';
 import '../aframe/menu-interactable';
-import { BACK_MENU } from '../Events';
+import '../aframe/look-at-camera';
+
+import {
+  BACK_MENU,
+  MODEL_CHANGED,
+  VISUAL_GROUPS,
+  RUN_SIMULATION,
+} from '../Events';
+import { mainMenu, VGMainMenu } from './mainMenu';
+import {
+  MAIN_MENU,
+  SET_PROJECT_MENU,
+  VISUAL_GROUPS_MENU,
+  NEW_DATA_MENU,
+} from './menuStates';
+import models from '../../models/models';
 
 class Menu extends Component {
   render() {
-    const { buttons, menuTitle, id, back } = this.props;
+    const { id, currentMenu, currentModel } = this.props;
+
+    let menu;
+    let menuTitle;
+    let back = false;
+    if (currentMenu === MAIN_MENU.id) {
+      menu = mainMenu;
+      for (const m of models) {
+        if (m.name === currentModel && m.visualGroups) {
+          menu = VGMainMenu;
+          break;
+        }
+      }
+      menuTitle = MAIN_MENU.title;
+    } else if (currentMenu === SET_PROJECT_MENU.id) {
+      const projectMenu = [];
+      for (const m of models) {
+        if (m.name !== currentModel) {
+          projectMenu.push({
+            text: m.name,
+            color: m.color,
+            event: MODEL_CHANGED,
+            evtDetail: m.name,
+          });
+        }
+      }
+      menu = projectMenu;
+      menuTitle = SET_PROJECT_MENU.title;
+      back = true;
+    } else if (currentMenu === VISUAL_GROUPS_MENU.id) {
+      const visualGroupsMenu = [];
+      // eslint-disable-next-line no-eval
+      const visualGroups = eval(
+        'network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()'
+      );
+      for (let i = 0; i < visualGroups.length; i++) {
+        const vg = visualGroups[i];
+        visualGroupsMenu.push({
+          text: vg.wrappedObj.name,
+          color: '#48BAEA',
+          event: VISUAL_GROUPS,
+          evtDetail: i,
+        });
+      }
+      menu = visualGroupsMenu;
+      menuTitle = VISUAL_GROUPS_MENU.title;
+      back = true;
+    } else if (currentMenu === NEW_DATA_MENU.id) {
+      menu = [
+        {
+          text: 'Pipette',
+          color: '#e0cb49',
+          event: RUN_SIMULATION,
+          evtDetail: null,
+        },
+      ];
+      menuTitle = NEW_DATA_MENU.title;
+      back = true;
+    }
 
     const buttonsMap = [];
 
-    const shrink = buttons.length > 6;
+    const shrink = menu.length > 6;
     let yPos = shrink ? 1.4 : 0;
-    for (const b of buttons) {
+    for (const b of menu) {
       buttonsMap.push({
         ...b,
         position: `0 ${yPos} 0.01`,
@@ -40,7 +113,11 @@ class Menu extends Component {
     ) : null;
 
     return (
-      <a-entity id="entity_menu" position="4 1.6 -3" rotation="0 0 0">
+      <a-entity
+        id="entity_menu"
+        position="4 1.6 -3"
+        look-at-camera={`id: ${id}`}
+      >
         <a-entity
           id="menuBackground"
           mixin="slice"
@@ -71,15 +148,10 @@ class Menu extends Component {
   }
 }
 
-Menu.defaultProps = {
-  back: false,
-};
-
 Menu.propTypes = {
   id: PropTypes.string.isRequired,
-  buttons: PropTypes.array.isRequired,
-  menuTitle: PropTypes.string.isRequired,
-  back: PropTypes.bool,
+  currentMenu: PropTypes.string.isRequired,
+  currentModel: PropTypes.string.isRequired,
 };
 
 export default Menu;

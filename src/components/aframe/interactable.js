@@ -10,25 +10,24 @@ AFRAME.registerComponent('interactable', {
   init: function () {
     const { el } = this;
     const { id } = this.data;
-    this.scene = document.getElementById(`${id}_scene`);
+    const scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('mouseenter', () => {
       const event = new CustomEvent('mesh_hover', { detail: el });
-      this.scene.dispatchEvent(event);
+      scene.dispatchEvent(event);
     });
 
     el.addEventListener('mouseleave', () => {
       const event = new CustomEvent('mesh_hover_leave', { detail: el });
-      this.scene.dispatchEvent(event);
+      scene.dispatchEvent(event);
     });
 
     el.addEventListener('triggerdown', () => {
-      clicked(this.scene, el);
+      clicked(scene, el);
     });
 
     el.addEventListener('click', () => {
-      clicked(this.scene, el);
-      console.log('click');
+      clicked(scene, el);
     });
   },
 });

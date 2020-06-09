@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import Manager from '@geppettoengine/geppetto-client/js/common/Manager';
 import AA from '@geppettoengine/geppetto-client/js/geppettoModel/model/ArrayElementInstance';
-import { rgbToHex } from '../../geppetto-client/geppetto-core/geppetto-js/Utility';
+import { rgbToHex } from '../../geppetto-client/geppetto-core/src/Utility';
 
 const GEPPETTO = {};
 window.GEPPETTO = GEPPETTO;

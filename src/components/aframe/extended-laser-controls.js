@@ -1,3 +1,5 @@
+import { COLLAPSE_MENU } from '../Events';
+
 function emitEvent(event, raycaster) {
   if (raycaster.intersectedEls.length > 0) {
     raycaster.intersectedEls[0].emit(event);
@@ -6,7 +8,7 @@ function emitEvent(event, raycaster) {
 
 AFRAME.registerComponent('extended-laser-controls', {
   schema: {
-    cameraID: { type: 'string' },
+    id: { type: 'string' },
   },
   init: function () {
     const { el } = this;
@@ -15,6 +17,7 @@ AFRAME.registerComponent('extended-laser-controls', {
 
     const camera = document.getElementById(`${id}_camera`);
     const model = document.getElementById(`${id}_model`);
+    const scene = document.getElementById(`${id}_scene`);
 
     el.addEventListener('gripdown', () => {
       emitEvent('gripdown', raycaster);
@@ -38,5 +41,8 @@ AFRAME.registerComponent('extended-laser-controls', {
       const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
       camera.dispatchEvent(event);
     });
+    // el.addEventListener(COLLAPSE_MENU, () => {
+    //   scene.emit(COLLAPSE_MENU);
+    // });
   },
 });

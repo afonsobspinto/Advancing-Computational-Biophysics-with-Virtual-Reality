@@ -12,7 +12,6 @@ import 'aframe-slice9-component';
 import GeppettoThree from './GeppettoThree';
 import LaserControls from '../LaserControls';
 import Menu from '../menu/Menu';
-import { mainMenu, VGMainMenu } from '../menu/mainMenu';
 import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
@@ -20,20 +19,16 @@ import '../aframe/interactable';
 import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
-import models from '../../models/models';
+import { MAIN_MENU } from '../menu/menuStates';
 import {
   MENU_CLICK,
   MODEL_CHANGED,
   BACK_MENU,
   VISUAL_GROUPS,
   RUN_SIMULATION,
+  COLLAPSE_MENU,
 } from '../Events';
-import {
-  MAIN_MENU,
-  SET_PROJECT_MENU,
-  VISUAL_GROUPS_MENU,
-  NEW_DATA_MENU,
-} from '../menu/menuStates';
+
 import {
   getSimulationData,
   getVoltageColor,
@@ -51,6 +46,7 @@ class Canvas extends Component {
       loadedTextures: false,
       visualGroups: false,
       currentMenu: MAIN_MENU.id,
+      isMenuVisible: true,
       simulation: false,
       time: 0,
       simulationData: null,
@@ -64,6 +60,7 @@ class Canvas extends Component {
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
+    this.handleMenuCollapse = this.handleMenuCollapse.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
     this.threeMeshes = {};
@@ -83,6 +80,11 @@ class Canvas extends Component {
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
     this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
+    document.addEventListener('keypress', this.handleMenuCollapse);
+    this.sceneRef.current.addEventListener(
+      COLLAPSE_MENU,
+      this.handleMenuCollapse
+    );
     // TODO: remove this workaround
     this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
       this.showVisualGroups(
@@ -261,6 +263,13 @@ class Canvas extends Component {
     handleHoverLeave(evt, false);
   }
 
+  handleMenuCollapse(evt) {
+    if (evt.keyCode == undefined || evt.keyCode === 109) {
+      const { isMenuVisible } = this.state;
+      this.setState({ isMenuVisible: !isMenuVisible });
+    }
+  }
+
   handleClick(evt) {
     const { handleClick } = this.props;
     if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
@@ -298,6 +307,8 @@ class Canvas extends Component {
       this.menuHistory.push(currentMenu);
       this.setState({ currentMenu: detail });
     } else if (event === MODEL_CHANGED) {
+      const lastMenu = this.menuHistory.pop();
+      this.setState({ currentMenu: lastMenu });
       handleModelChange(detail);
     } else if (event === BACK_MENU) {
       const lastMenu = this.menuHistory.pop();
@@ -311,12 +322,16 @@ class Canvas extends Component {
         )}].show(true)`
       );
     } else if (event === RUN_SIMULATION) {
+      const t0 = performance.now();
+
       this.colorController.addColorFunction(
         GEPPETTO.ModelFactory.instances.getInstance(
           GEPPETTO.ModelFactory.getAllPotentialInstancesEndingWith('.v')
         ),
         getVoltageColor
       );
+      const t1 = performance.now();
+      console.log(`Call to addColorFunction took ${t1 - t0} milliseconds.`);
       this.timer = setInterval(() => {
         const { time } = this.state;
         this.setState({ time: time + 1 });
@@ -355,6 +370,7 @@ class Canvas extends Component {
     const {
       loadedTextures,
       currentMenu,
+      isMenuVisible,
       simulation,
       time,
       simulationData,
@@ -369,64 +385,6 @@ class Canvas extends Component {
         this.isReady = true;
       }
       this.threeMeshes = this.geppettoThree.getThreeMeshes(instances);
-    }
-
-    let menu;
-    let menuTitle;
-    let back = false;
-    if (currentMenu === MAIN_MENU.id) {
-      menu = mainMenu;
-      for (const m of models) {
-        if (m.name === model && m.visualGroups) {
-          menu = VGMainMenu;
-          break;
-        }
-      }
-      menuTitle = MAIN_MENU.title;
-    } else if (currentMenu === SET_PROJECT_MENU.id) {
-      const projectMenu = [];
-      for (const m of models) {
-        if (m.name !== model) {
-          projectMenu.push({
-            text: m.name,
-            color: m.color,
-            event: MODEL_CHANGED,
-            evtDetail: m.name,
-          });
-        }
-      }
-      menu = projectMenu;
-      menuTitle = SET_PROJECT_MENU.title;
-      back = true;
-    } else if (currentMenu === VISUAL_GROUPS_MENU.id) {
-      const visualGroupsMenu = [];
-      // eslint-disable-next-line no-eval
-      const visualGroups = eval(
-        'network_CA1PyramidalCell.CA1_CG[0].getVisualGroups()'
-      );
-      for (let i = 0; i < visualGroups.length; i++) {
-        const vg = visualGroups[i];
-        visualGroupsMenu.push({
-          text: vg.wrappedObj.name,
-          color: '#48BAEA',
-          event: VISUAL_GROUPS,
-          evtDetail: i,
-        });
-      }
-      menu = visualGroupsMenu;
-      menuTitle = VISUAL_GROUPS_MENU.title;
-      back = true;
-    } else if (currentMenu === NEW_DATA_MENU.id) {
-      menu = [
-        {
-          text: 'Pipette',
-          color: '#e0cb49',
-          event: RUN_SIMULATION,
-          evtDetail: null,
-        },
-      ];
-      menuTitle = NEW_DATA_MENU.title;
-      back = true;
     }
 
     if (simulation) {
@@ -447,6 +405,7 @@ class Canvas extends Component {
         id={sceneID}
         ref={this.sceneRef}
         background={sceneBackground}
+        loading-screen="dotsColor: red; backgroundColor: black"
       >
         <a-assets>
           <img id="vfb" src={VFB} alt="vfb thumbnail" />
@@ -500,7 +459,9 @@ class Canvas extends Component {
             acceleration="200"
           />
           <LaserControls id={id} />
-          <Menu id={id} buttons={menu} menuTitle={menuTitle} back={back} />
+          {isMenuVisible ? (
+            <Menu id={id} currentMenu={currentMenu} currentModel={model} />
+          ) : null}
         </a-entity>
 
         <a-entity
