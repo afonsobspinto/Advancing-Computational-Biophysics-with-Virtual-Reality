@@ -238,7 +238,10 @@ class Canvas extends Component {
     if (Object.keys(this.hoveredMeshes).includes(evt.detail.id)) {
       return;
     }
-    if (evt.detail.getObject3D('mesh').material) {
+    if (
+      evt.detail.getObject3D('mesh') !== undefined &&
+      evt.detail.getObject3D('mesh').material
+    ) {
       this.hoveredMeshes[evt.detail.id] = {
         ...evt.detail.getObject3D('mesh').material.color,
       };
@@ -273,8 +276,10 @@ class Canvas extends Component {
   handleClick(evt) {
     const { handleClick } = this.props;
     const preventDefault = handleClick(evt);
-    if (!preventDefault) {
+    if (!preventDefault && evt.detail.getObject3D('mesh') !== undefined) {
       if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
+        // eslint-disable-next-line no-param-reassign
+        evt.detail.selected = false;
         const color = this.selectedMeshes[evt.detail.id];
         evt.detail.getObject3D('mesh').material.color.set(color);
         delete this.selectedMeshes[evt.detail.id];
@@ -282,6 +287,8 @@ class Canvas extends Component {
           ...evt.detail.getObject3D('mesh').material.color,
         };
       } else {
+        // eslint-disable-next-line no-param-reassign
+        evt.detail.selected = true;
         const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
         this.selectedMeshes[evt.detail.id] = meshCopy;
 
