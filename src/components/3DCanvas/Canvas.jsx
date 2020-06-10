@@ -16,7 +16,6 @@ import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
-import '../aframe/rotatable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import { MAIN_MENU } from '../menu/menuStates';
@@ -264,6 +263,7 @@ class Canvas extends Component {
   }
 
   handleMenuCollapse(evt) {
+    // eslint-disable-next-line eqeqeq
     if (evt.keyCode == undefined || evt.keyCode === 109) {
       const { isMenuVisible } = this.state;
       this.setState({ isMenuVisible: !isMenuVisible });
@@ -272,30 +272,31 @@ class Canvas extends Component {
 
   handleClick(evt) {
     const { handleClick } = this.props;
-    if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
-      const color = this.selectedMeshes[evt.detail.id];
-      evt.detail.getObject3D('mesh').material.color.set(color);
-      delete this.selectedMeshes[evt.detail.id];
-      this.hoveredMeshes = {
-        ...evt.detail.getObject3D('mesh').material.color,
-      };
-      handleClick(evt, true);
-    } else {
-      const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
-      this.selectedMeshes[evt.detail.id] = meshCopy;
+    const preventDefault = handleClick(evt);
+    if (!preventDefault) {
+      if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
+        const color = this.selectedMeshes[evt.detail.id];
+        evt.detail.getObject3D('mesh').material.color.set(color);
+        delete this.selectedMeshes[evt.detail.id];
+        this.hoveredMeshes = {
+          ...evt.detail.getObject3D('mesh').material.color,
+        };
+      } else {
+        const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
+        this.selectedMeshes[evt.detail.id] = meshCopy;
 
-      evt.detail
-        .getObject3D('mesh')
-        .material.color.setRGB(
-          SELECTED_COLOR.r,
-          SELECTED_COLOR.g,
-          SELECTED_COLOR.b
-        );
+        evt.detail
+          .getObject3D('mesh')
+          .material.color.setRGB(
+            SELECTED_COLOR.r,
+            SELECTED_COLOR.g,
+            SELECTED_COLOR.b
+          );
 
-      this.hoveredMeshes = {
-        ...evt.detail.getObject3D('mesh').material.color,
-      };
-      handleClick(evt, false);
+        this.hoveredMeshes = {
+          ...evt.detail.getObject3D('mesh').material.color,
+        };
+      }
     }
   }
 
@@ -470,7 +471,7 @@ class Canvas extends Component {
           rotation={rotation}
           scale="0.1, 0.1 0.1"
           id={modelID}
-          rotatable={`id: ${id}`}
+          interactable={`id: ${id}`}
         >
           {Object.keys(this.threeMeshes)
             .filter((key) => this.threeMeshes[key].visible)
@@ -496,8 +497,12 @@ Canvas.defaultProps = {
   position: '-20 -20 -80',
   rotation: '0 0 0',
   sceneBackground: 'color: #ECECEC',
-  handleHover: () => {},
-  handleClick: () => {},
+  handleHover: () => {
+    return false;
+  },
+  handleClick: () => {
+    return false;
+  },
   handleHoverLeave: () => {},
   handleModelChange: () => {},
 };

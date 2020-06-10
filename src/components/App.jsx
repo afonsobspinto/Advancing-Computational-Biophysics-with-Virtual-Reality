@@ -68,8 +68,6 @@ export default class App extends Component {
               position={position}
               rotation={rotation}
               sceneBackground={sceneBackground}
-              handleClick={this.handleClick}
-              handleHover={this.handleHover}
               handleModelChange={this.handleModelChange}
             />
           ) : (
