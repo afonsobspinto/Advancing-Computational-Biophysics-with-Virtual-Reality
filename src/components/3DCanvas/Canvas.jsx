@@ -278,6 +278,8 @@ class Canvas extends Component {
     const preventDefault = handleClick(evt);
     if (!preventDefault && evt.detail.getObject3D('mesh') !== undefined) {
       if (Object.keys(this.selectedMeshes).includes(evt.detail.id)) {
+        // eslint-disable-next-line no-param-reassign
+        evt.detail.selected = false;
         const color = this.selectedMeshes[evt.detail.id];
         evt.detail.getObject3D('mesh').material.color.set(color);
         delete this.selectedMeshes[evt.detail.id];
@@ -285,6 +287,8 @@ class Canvas extends Component {
           ...evt.detail.getObject3D('mesh').material.color,
         };
       } else {
+        // eslint-disable-next-line no-param-reassign
+        evt.detail.selected = true;
         const meshCopy = evt.detail.getObject3D('mesh').material.defaultColor;
         this.selectedMeshes[evt.detail.id] = meshCopy;
 

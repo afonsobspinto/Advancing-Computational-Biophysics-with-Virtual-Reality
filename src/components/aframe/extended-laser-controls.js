@@ -6,6 +6,20 @@ function emitEvent(event, raycaster) {
   }
 }
 
+function emitEventSelected(event, model, detail) {
+  const cEvent = new CustomEvent(event, { detail: detail });
+  let toModel = true;
+  for (const child of model.children) {
+    if (child.selected) {
+      child.dispatchEvent(cEvent);
+      toModel = false;
+    }
+  }
+  if (toModel) {
+    model.dispatchEvent(cEvent);
+  }
+}
+
 AFRAME.registerComponent('extended-laser-controls', {
   schema: {
     id: { type: 'string' },
@@ -19,15 +33,11 @@ AFRAME.registerComponent('extended-laser-controls', {
     const model = document.getElementById(`${id}_model`);
 
     el.addEventListener('gripdown', () => {
-      const event = new CustomEvent('gripdown', { detail: el.id });
-      emitEvent('gripdown', raycaster);
-      model.dispatchEvent(event);
+      emitEventSelected('gripdown', model, el.id);
     });
 
     el.addEventListener('gripup', () => {
-      const event = new CustomEvent('gripup', { detail: el.id });
-      emitEvent('gripup', raycaster);
-      model.dispatchEvent(event);
+      emitEventSelected('gripup', model, el.id);
     });
 
     el.addEventListener('triggerdown', () => {
@@ -38,14 +48,13 @@ AFRAME.registerComponent('extended-laser-controls', {
       emitEvent('triggerup', raycaster);
     });
 
+    el.addEventListener(BRING_CLOSER, () => {
+      emitEventSelected(BRING_CLOSER, model, null);
+    });
+
     el.addEventListener('thumbstickmoved', (evt) => {
       const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
       camera.dispatchEvent(event);
-    });
-
-    el.addEventListener(BRING_CLOSER, () => {
-      emitEvent(BRING_CLOSER, raycaster);
-      model.emit(BRING_CLOSER);
     });
   },
 });

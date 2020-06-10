@@ -28,6 +28,7 @@ AFRAME.registerComponent('interactable', {
       lhand: { x: 0, y: 0, z: 0 },
     };
     this.originalPosition = null;
+    this.parent = null;
 
     el.addEventListener('mouseenter', () => {
       const event = new CustomEvent('mesh_hover', { detail: el });
@@ -69,78 +70,88 @@ AFRAME.registerComponent('interactable', {
 
     el.addEventListener(BRING_CLOSER, () => {
       const { closerDistance } = this.data;
-
-      if (this.originalPosition) {
-        el.object3D.position.set(
-          this.originalPosition.x,
-          this.originalPosition.y,
-          this.originalPosition.z
-        );
-        this.originalPosition = null;
-      } else {
-        this.originalPosition = { ...el.object3D.position };
-        const bbox = new THREE.Box3().setFromObject(el.object3D);
-        const center = bbox.getCenter();
-        const xDiff = el.object3D.position.x - center.x;
-        const yDiff = el.object3D.position.y - bbox.min.y;
-        const cameraPos = { ...camera.object3D.position };
-        cameraPos.z += bbox.min.z - closerDistance;
-        cameraPos.y += yDiff;
-        cameraPos.x += xDiff;
-        el.object3D.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
+      if (el.selected || el.id === `${id}_model`) {
+        if (this.originalPosition) {
+          // if (this.parent != null) {
+          //   this.parent.attach(el.object3D);
+          // }
+          el.object3D.position.set(
+            this.originalPosition.x,
+            this.originalPosition.y,
+            this.originalPosition.z
+          );
+          this.originalPosition = null;
+          // this.parent = null;
+        } else {
+          this.originalPosition = { ...el.object3D.position };
+          const bbox = new THREE.Box3().setFromObject(el.object3D);
+          const center = bbox.getCenter();
+          const xDiff = el.object3D.position.x - center.x;
+          const yDiff = el.object3D.position.y - bbox.min.y;
+          const cameraPos = { ...camera.object3D.position };
+          cameraPos.z += bbox.min.z - closerDistance;
+          cameraPos.y += yDiff;
+          cameraPos.x += xDiff;
+          // this.parent = el.parentNode.object3D;
+          // scene.object3D.attach(el.object3D);
+          el.object3D.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
+        }
       }
     });
   },
   tick: function () {
     const { el } = this;
-    const { revesed } = this.data;
-
-    if (this.rhand && this.lhand) {
-      if (this.handOldPos.rhand && this.handOldPos.lhand) {
-        if (this.isExpanding()) {
-          el.object3D.scale.addScalar(0.001);
-        } else {
-          el.object3D.scale.addScalar(-0.001);
+    const { revesed, id } = this.data;
+    if (el.selected || el.id === `${id}_model`) {
+      if (this.rhand && this.lhand) {
+        if (this.handOldPos.rhand && this.handOldPos.lhand) {
+          if (this.isExpanding()) {
+            el.object3D.scale.addScalar(0.001);
+          } else {
+            el.object3D.scale.addScalar(-0.001);
+          }
         }
-      }
-      this.handOldPos.rhand = { ...this.rhand.object3D.position };
-      this.handOldPos.lhand = { ...this.lhand.object3D.position };
-    } else if (this.rhand) {
-      let rotate = {
-        // eslint-disable-next-line no-underscore-dangle
-        x: this.rhand.object3D.rotation.x - this.previousHandRotation.rhand._x,
-        // eslint-disable-next-line no-underscore-dangle
-        y: this.rhand.object3D.rotation.y - this.previousHandRotation.rhand._y,
-        // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
-      };
-      if (revesed) {
-        rotate = {
-          x: rotate.x * -1,
-          y: rotate.y * -1,
-          z: rotate.z * -1,
+        this.handOldPos.rhand = { ...this.rhand.object3D.position };
+        this.handOldPos.lhand = { ...this.lhand.object3D.position };
+      } else if (this.rhand) {
+        let rotate = {
+          x:
+            this.rhand.object3D.rotation.x - this.previousHandRotation.rhand._x,
+          y:
+            this.rhand.object3D.rotation.y - this.previousHandRotation.rhand._y,
+          // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
         };
-      }
-      el.object3D.rotation.x = this.baseRotation.rhand.x + rotate.x;
-      el.object3D.rotation.y = this.baseRotation.rhand.y + rotate.y;
-      this.previousHandRotation.rhand = { ...this.rhand.object3D.rotation };
-    } else if (this.lhand) {
-      let rotate = {
-        // eslint-disable-next-line no-underscore-dangle
-        x: this.lhand.object3D.rotation.x - this.previousHandRotation.lhand._x,
-        // eslint-disable-next-line no-underscore-dangle
-        y: this.lhand.object3D.rotation.y - this.previousHandRotation.lhand._y,
-        // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
-      };
-      if (revesed) {
-        rotate = {
-          x: rotate.x * -1,
-          y: rotate.y * -1,
-          z: rotate.z * -1,
+        if (revesed) {
+          rotate = {
+            x: rotate.x * -1,
+            y: rotate.y * -1,
+            z: rotate.z * -1,
+          };
+        }
+        el.object3D.rotation.x = this.baseRotation.rhand.x + rotate.x;
+        el.object3D.rotation.y = this.baseRotation.rhand.y + rotate.y;
+        this.previousHandRotation.rhand = { ...this.rhand.object3D.rotation };
+      } else if (this.lhand) {
+        let rotate = {
+          // eslint-disable-next-line no-underscore-dangle
+          x:
+            this.lhand.object3D.rotation.x - this.previousHandRotation.lhand._x,
+          // eslint-disable-next-line no-underscore-dangle
+          y:
+            this.lhand.object3D.rotation.y - this.previousHandRotation.lhand._y,
+          // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
         };
+        if (revesed) {
+          rotate = {
+            x: rotate.x * -1,
+            y: rotate.y * -1,
+            z: rotate.z * -1,
+          };
+        }
+        el.object3D.rotation.x = this.baseRotation.lhand.x + rotate.x;
+        el.object3D.rotation.y = this.baseRotation.lhand.y + rotate.y;
+        this.previousHandRotation.lhand = { ...this.lhand.object3D.rotation };
       }
-      el.object3D.rotation.x = this.baseRotation.lhand.x + rotate.x;
-      el.object3D.rotation.y = this.baseRotation.lhand.y + rotate.y;
-      this.previousHandRotation.lhand = { ...this.lhand.object3D.rotation };
     }
   },
 
