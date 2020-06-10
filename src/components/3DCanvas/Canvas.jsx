@@ -16,7 +16,6 @@ import VFB from '../../../assets/showcase-gallery/vfb.png';
 import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
-import '../aframe/stretchable';
 import '../aframe/thumbstick-controls';
 import '../aframe/scroll-movement';
 import { MAIN_MENU } from '../menu/menuStates';
@@ -264,6 +263,7 @@ class Canvas extends Component {
   }
 
   handleMenuCollapse(evt) {
+    // eslint-disable-next-line eqeqeq
     if (evt.keyCode == undefined || evt.keyCode === 109) {
       const { isMenuVisible } = this.state;
       this.setState({ isMenuVisible: !isMenuVisible });
@@ -471,7 +471,7 @@ class Canvas extends Component {
           rotation={rotation}
           scale="0.1, 0.1 0.1"
           id={modelID}
-          stretchable={`id: ${id}`}
+          interactable={`id: ${id}`}
         >
           {Object.keys(this.threeMeshes)
             .filter((key) => this.threeMeshes[key].visible)
