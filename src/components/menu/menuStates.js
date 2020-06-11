@@ -5,3 +5,4 @@ export const VISUAL_GROUPS_MENU = {
   title: 'Potassium Distribution',
 };
 export const NEW_DATA_MENU = { id: 'new_data', title: 'Add Data' };
+export const SETTINGS_MENU = { id: 'settings', title: 'Settings' };

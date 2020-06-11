@@ -6,37 +6,40 @@ import 'aframe-layout-component';
 import 'aframe-slice9-component';
 import '../aframe/menu-interactable';
 import '../aframe/look-at-camera';
+import { randomColor } from '../../utilities/utils';
 
 import {
   BACK_MENU,
   MODEL_CHANGED,
   VISUAL_GROUPS,
   RUN_SIMULATION,
+  FLIP_CAMERA,
 } from '../Events';
-import { mainMenu, VGMainMenu } from './mainMenu';
+import mainMenu from './mainMenu';
 import {
   MAIN_MENU,
   SET_PROJECT_MENU,
   VISUAL_GROUPS_MENU,
   NEW_DATA_MENU,
+  SETTINGS_MENU,
 } from './menuStates';
 import models from '../../models/models';
 
 class Menu extends Component {
   render() {
     const { id, currentMenu, currentModel } = this.props;
-
+    let model = null;
+    for (const m of models) {
+      if (m.name === currentModel) {
+        model = m;
+        break;
+      }
+    }
     let menu;
     let menuTitle;
     let back = false;
     if (currentMenu === MAIN_MENU.id) {
-      menu = mainMenu;
-      for (const m of models) {
-        if (m.name === currentModel && m.visualGroups) {
-          menu = VGMainMenu;
-          break;
-        }
-      }
+      menu = mainMenu(model);
       menuTitle = MAIN_MENU.title;
     } else if (currentMenu === SET_PROJECT_MENU.id) {
       const projectMenu = [];
@@ -63,7 +66,7 @@ class Menu extends Component {
         const vg = visualGroups[i];
         visualGroupsMenu.push({
           text: vg.wrappedObj.name,
-          color: '#48BAEA',
+          color: randomColor(),
           event: VISUAL_GROUPS,
           evtDetail: i,
         });
@@ -75,12 +78,35 @@ class Menu extends Component {
       menu = [
         {
           text: 'Pipette',
-          color: '#e0cb49',
+          color: randomColor(),
           event: RUN_SIMULATION,
           evtDetail: null,
         },
       ];
       menuTitle = NEW_DATA_MENU.title;
+      back = true;
+    } else if (currentMenu === SETTINGS_MENU.id) {
+      menu = [
+        {
+          text: 'Flip Camera X',
+          color: randomColor(),
+          event: FLIP_CAMERA,
+          evtDetail: 'x',
+        },
+        {
+          text: 'Flip Camera Y',
+          color: randomColor(),
+          event: FLIP_CAMERA,
+          evtDetail: 'y',
+        },
+        {
+          text: 'Flip Camera Z',
+          color: randomColor(),
+          event: FLIP_CAMERA,
+          evtDetail: 'z',
+        },
+      ];
+      menuTitle = SETTINGS_MENU.title;
       back = true;
     }
 

@@ -97,6 +97,7 @@ const models = [
     ],
     color: '#e0cb49',
     visualGroups: false,
+    simulation: null,
   },
 ];
 

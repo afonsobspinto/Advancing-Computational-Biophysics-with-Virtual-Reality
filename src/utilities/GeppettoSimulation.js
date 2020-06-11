@@ -44,9 +44,6 @@ export function getSimulationData(simulation) {
 }
 
 export function getVoltageColor(x) {
-  // if (x > -0.055) {
-  //   console.log(x);
-  // }
   x = (x + 0.07) / 0.1; // normalization
   if (x < 0) {
     x = 0;
