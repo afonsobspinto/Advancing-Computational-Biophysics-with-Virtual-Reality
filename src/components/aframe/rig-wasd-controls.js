@@ -30,6 +30,14 @@ function isEmptyObject(keys) {
   return true;
 }
 
+function noWheel(wheel) {
+  let key;
+  for (key in keys) {
+    return false;
+  }
+  return true;
+}
+
 AFRAME.registerComponent('rig-wasd-controls', {
   schema: {
     acceleration: { default: 65 },
@@ -46,6 +54,7 @@ AFRAME.registerComponent('rig-wasd-controls', {
   },
   init: function () {
     this.keys = {};
+    this.wheel = {};
 
     this.position = {};
     this.velocity = new THREE.Vector3();
@@ -55,6 +64,7 @@ AFRAME.registerComponent('rig-wasd-controls', {
     this.onFocus = bind(this.onFocus, this);
     this.onKeyDown = bind(this.onKeyDown, this);
     this.onKeyUp = bind(this.onKeyUp, this);
+    this.onWheel = bind(this.onWheel, this);
     this.onVisibilityChange = bind(this.onVisibilityChange, this);
     this.attachVisibilityEventListeners();
     this.getOrientationElement();
@@ -68,7 +78,8 @@ AFRAME.registerComponent('rig-wasd-controls', {
     if (
       !velocity[data.adAxis] &&
       !velocity[data.wsAxis] &&
-      isEmptyObject(this.keys)
+      isEmptyObject(this.keys) &&
+      isEmptyObject(this.wheel)
     ) {
       return;
     }
@@ -177,11 +188,13 @@ AFRAME.registerComponent('rig-wasd-controls', {
     }
     if (data.wsEnabled) {
       wsSign = data.wsInverted ? -1 : 1;
-      if (keys.KeyW || keys.ArrowUp) {
+      if (keys.KeyW || keys.ArrowUp || this.wheel.up) {
         velocity[wsAxis] -= wsSign * acceleration * delta;
+        delete this.wheel.up;
       }
-      if (keys.KeyS || keys.ArrowDown) {
+      if (keys.KeyS || keys.ArrowDown || this.wheel.down) {
         velocity[wsAxis] += wsSign * acceleration * delta;
+        delete this.wheel.down;
       }
     }
   },
@@ -229,11 +242,13 @@ AFRAME.registerComponent('rig-wasd-controls', {
   attachKeyEventListeners: function () {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
+    window.addEventListener('wheel', this.onWheel);
   },
 
   removeKeyEventListeners: function () {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
+    window.removeEventListener('wheel', this.onWheel);
   },
 
   onBlur: function () {
@@ -265,5 +280,13 @@ AFRAME.registerComponent('rig-wasd-controls', {
   onKeyUp: function (event) {
     const code = event.code || KEYCODE_TO_CODE[event.keyCode];
     delete this.keys[code];
+  },
+
+  onWheel: function (event) {
+    if (event.deltaY > 0) {
+      this.wheel.down = true;
+    } else if (event.deltaY < 0) {
+      this.wheel.up = true;
+    }
   },
 });

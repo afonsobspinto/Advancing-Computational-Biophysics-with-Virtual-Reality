@@ -17,7 +17,6 @@ import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
 import '../aframe/thumbstick-controls';
-import '../aframe/scroll-movement';
 import '../aframe/rig-wasd-controls';
 import { MAIN_MENU } from '../menu/menuStates';
 import {
@@ -468,7 +467,6 @@ class Canvas extends Component {
           id={cameraID}
           position="0 5 0"
           thumbstick-controls
-          scroll-movement
           rig-wasd-controls="fly:true; acceleration:200"
         >
           <a-camera
