@@ -31,7 +31,7 @@ import {
 import {
   getSimulationData,
   getVoltageColor,
-} from '../../utilities/GeppettoSimulation/GeppettoSimulation';
+} from '../../utilities/GeppettoSimulation';
 import ColorController from './ColorController';
 import models from '../../models/models';
 

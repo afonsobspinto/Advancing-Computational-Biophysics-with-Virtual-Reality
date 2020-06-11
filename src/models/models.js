@@ -5,6 +5,11 @@ import ca1OutputMapping from './rawRecording_ca1/outputMapping.dat';
 import auditoryOutputMapping from './rawRecording_auditory/outputMapping.dat';
 import ca1Results0 from './rawRecording_ca1/results0.dat';
 import auditoryResults0 from './rawRecording_auditory/results0.dat';
+import auditoryResults1 from './rawRecording_auditory/results1.dat';
+import auditoryResults2 from './rawRecording_auditory/results2.dat';
+import auditoryResults3 from './rawRecording_auditory/results3.dat';
+import auditoryResults4 from './rawRecording_auditory/results4.dat';
+import auditoryResults5 from './rawRecording_auditory/results5.dat';
 
 const models = [
   {
@@ -23,8 +28,15 @@ const models = [
     visualGroups: false,
     simulation: {
       outputMapping: auditoryOutputMapping,
-      results: [auditoryResults0],
-      step: 10,
+      results: [
+        auditoryResults0,
+        auditoryResults1,
+        auditoryResults2,
+        auditoryResults3,
+        auditoryResults4,
+        auditoryResults5,
+      ],
+      step: 1,
     },
   },
   {

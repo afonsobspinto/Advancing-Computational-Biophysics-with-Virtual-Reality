@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { BRING_CLOSER } from '../Events';
 
 function clicked(target, detail) {
