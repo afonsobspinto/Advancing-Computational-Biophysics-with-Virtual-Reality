@@ -1,11 +1,9 @@
-/* eslint-disable no-param-reassign */
-import outputMapping from './rawRecording/outputMapping.dat';
-import results from './rawRecording/results0.dat';
+export function getSimulationData(simulation) {
+  const { outputMapping, results } = simulation;
 
-export function getSimulationData() {
   const simulationMap = {};
   const columns = outputMapping.split('\n')[1].split(' ');
-  const lines = results.split('\n');
+  const lines = results[0].split('\n');
   for (const l of lines) {
     if (l !== '') {
       const values = l.split('	');
