@@ -25,7 +25,7 @@ export default class App extends Component {
     for (const model of models) {
       if (model.name === newModel) {
         GEPPETTO.ModelFactory = null;
-        // eslint-disable-next-line global-require
+        // eslint-disable-next-line import/no-unresolved, global-require
         require('@geppettoengine/geppetto-client/js/geppettoModel/ModelFactory').default(
           GEPPETTO
         );

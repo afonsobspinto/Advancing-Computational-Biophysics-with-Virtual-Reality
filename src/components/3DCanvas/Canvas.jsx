@@ -31,8 +31,9 @@ import {
 import {
   getSimulationData,
   getVoltageColor,
-} from '../../utilities/GeppettoSimulation/GeppettoSimulation';
+} from '../../utilities/GeppettoSimulation';
 import ColorController from './ColorController';
+import models from '../../models/models';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
@@ -308,9 +309,16 @@ class Canvas extends Component {
   }
 
   handleMenuClick(evt) {
-    const { handleModelChange } = this.props;
+    const { handleModelChange, model } = this.props;
     const { currentMenu } = this.state;
     const { event, detail } = evt.detail;
+    let modelData = null;
+    for (const m of models) {
+      if (m.name === model) {
+        modelData = m;
+        break;
+      }
+    }
     if (event === MENU_CLICK) {
       this.menuHistory.push(currentMenu);
       this.setState({ currentMenu: detail });
@@ -342,13 +350,13 @@ class Canvas extends Component {
       console.log(`Call to addColorFunction took ${t1 - t0} milliseconds.`);
       this.timer = setInterval(() => {
         const { time } = this.state;
-        this.setState({ time: time + 1 });
-      }, 2);
+        this.setState({ time: time + modelData.simulation.step });
+      }, 10);
       this.setState({
         currentMenu: MAIN_MENU.id,
         simulation: true,
         visualGroups: true,
-        simulationData: getSimulationData(),
+        simulationData: getSimulationData(modelData.simulation),
       });
     }
   }
