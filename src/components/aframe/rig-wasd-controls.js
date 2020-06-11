@@ -30,14 +30,6 @@ function isEmptyObject(keys) {
   return true;
 }
 
-function noWheel(wheel) {
-  let key;
-  for (key in keys) {
-    return false;
-  }
-  return true;
-}
-
 AFRAME.registerComponent('rig-wasd-controls', {
   schema: {
     acceleration: { default: 65 },
