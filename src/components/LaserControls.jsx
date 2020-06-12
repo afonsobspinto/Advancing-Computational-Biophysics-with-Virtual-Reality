@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import 'aframe';
+import 'aframe-haptics-component';
 import './aframe/extended-laser-controls';
 
 class LaserControls extends Component {
@@ -15,6 +16,7 @@ class LaserControls extends Component {
           line="color: blue"
           raycaster="objects: .collidable"
           extended-laser-controls={`id: ${id}`}
+          // haptics="events: triggerdown; dur: 500; force: 1.0"
         />
         <a-entity
           id={`${id}_rightHand`}
@@ -22,6 +24,7 @@ class LaserControls extends Component {
           raycaster="objects: .collidable"
           line="color: blue"
           extended-laser-controls={`id: ${id}`}
+          // haptics="events: triggerdown; dur: 500; force: 1.0"
         />
       </a-entity>
     );

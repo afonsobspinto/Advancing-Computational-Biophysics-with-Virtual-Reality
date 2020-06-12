@@ -48,6 +48,7 @@
   "dependencies": {
     "aframe": "^1.0.4",
     "aframe-environment-component": "^2.0.0",
+    "aframe-haptics-component": "^1.6.1",
     "aframe-layout-component": "^5.3.0",
     "aframe-log-component": "^1.0.7",
     "aframe-render-order-component": "^1.1.0",

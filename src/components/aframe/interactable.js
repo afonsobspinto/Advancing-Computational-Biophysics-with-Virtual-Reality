@@ -62,40 +62,44 @@ AFRAME.registerComponent('interactable', {
     });
 
     el.addEventListener('gripup', (evt) => {
-      if (evt.detail === `${id}_rightHand`) {
-        this.rhand = null;
-      } else if (evt.detail === `${id}_leftHand`) {
-        this.lhand = null;
-      }
+      // if (evt.detail === `${id}_rightHand`) {
+      //   this.rhand = null;
+      // } else if (evt.detail === `${id}_leftHand`) {
+      //   this.lhand = null;
+      // }
+      this.rhand = null;
+      this.lhand = null;
     });
 
     el.addEventListener(BRING_CLOSER, () => {
       const { closerDistance } = this.data;
       if (el.selected || el.id === `${id}_model`) {
         if (this.originalPosition) {
-          // if (this.parent != null) {
-          //   this.parent.attach(el.object3D);
-          // }
+          if (this.parent !== null) {
+            this.parent.attach(el.object3D);
+          }
           el.object3D.position.set(
             this.originalPosition.x,
             this.originalPosition.y,
             this.originalPosition.z
           );
           this.originalPosition = null;
-          // this.parent = null;
+          this.parent = null;
         } else {
           this.originalPosition = { ...el.object3D.position };
           const bbox = new THREE.Box3().setFromObject(el.object3D);
           const center = bbox.getCenter();
           const xDiff = el.object3D.position.x - center.x;
           const yDiff = el.object3D.position.y - bbox.min.y;
-          const cameraPos = { ...camera.object3D.position };
-          cameraPos.z += bbox.min.z - closerDistance;
-          cameraPos.y += yDiff;
-          cameraPos.x += xDiff;
-          // this.parent = el.parentNode.object3D;
-          // scene.object3D.attach(el.object3D);
-          el.object3D.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
+          const closerPos = { ...camera.object3D.position };
+          closerPos.z += bbox.min.z - closerDistance;
+          closerPos.y += yDiff;
+          closerPos.x += xDiff;
+          console.log(this.originalPosition);
+          console.log(closerPos);
+          this.parent = el.parentNode.object3D;
+          scene.object3D.attach(el.object3D);
+          el.object3D.position.set(closerPos.x, closerPos.y, closerPos.z);
         }
       }
     });
