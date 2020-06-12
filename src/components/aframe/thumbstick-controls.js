@@ -156,7 +156,6 @@ AFRAME.registerComponent('thumbstick-controls', {
     }
     if (data.wsEnabled) {
       wsSign = data.wsInverted ? -1 : 1;
-      console.log(thumbstick.up);
       if (thumbstick.up) {
         velocity[wsAxis] -=
           wsSign * acceleration * delta * Math.abs(thumbstick.up);
