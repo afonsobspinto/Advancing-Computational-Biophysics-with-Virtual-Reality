@@ -1,32 +1,52 @@
-import { MOVE_PLAYER, STOP_PLAYER } from '../Events';
-
 const MAX_DELTA = 0.2;
 const CLAMP_VELOCITY = 0.00001;
+const KEYS = [
+  'KeyW',
+  'KeyA',
+  'KeyS',
+  'KeyD',
+  'ArrowUp',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowDown',
+];
+const KEYCODE_TO_CODE = {
+  '38': 'ArrowUp',
+  '37': 'ArrowLeft',
+  '40': 'ArrowDown',
+  '39': 'ArrowRight',
+  '87': 'KeyW',
+  '65': 'KeyA',
+  '83': 'KeyS',
+  '68': 'KeyD',
+};
+const { bind, shouldCaptureKeyEvent } = AFRAME.utils;
 
-function isEmptyObject(obj) {
-  for (const _ in obj) {
+function isEmptyObject(keys) {
+  let key;
+  for (key in keys) {
     return false;
   }
   return true;
 }
 
-const { bind } = AFRAME.utils;
-
-AFRAME.registerComponent('thumbstick-controls', {
+AFRAME.registerComponent('rig-wasd-controls', {
   schema: {
     acceleration: { default: 65 },
     adAxis: { default: 'x', oneOf: ['x', 'y', 'z'] },
     adEnabled: { default: true },
     adInverted: { default: false },
     easing: { default: 20 },
-    fly: { default: true },
-    id: { type: 'string' },
+    enabled: { default: true },
+    fly: { default: false },
     wsAxis: { default: 'z', oneOf: ['x', 'y', 'z'] },
     wsEnabled: { default: true },
     wsInverted: { default: false },
+    orientationEl: { type: 'selector' },
   },
   init: function () {
-    this.thumbstick = {};
+    this.keys = {};
+    this.wheel = {};
 
     this.position = {};
     this.velocity = new THREE.Vector3();
@@ -34,8 +54,9 @@ AFRAME.registerComponent('thumbstick-controls', {
     // Bind methods and add event listeners.
     this.onBlur = bind(this.onBlur, this);
     this.onFocus = bind(this.onFocus, this);
-    this.onThumbstickMovement = bind(this.onThumbstickMovement, this);
-    this.onThumbstickStop = bind(this.onThumbstickStop, this);
+    this.onKeyDown = bind(this.onKeyDown, this);
+    this.onKeyUp = bind(this.onKeyUp, this);
+    this.onWheel = bind(this.onWheel, this);
     this.onVisibilityChange = bind(this.onVisibilityChange, this);
     this.attachVisibilityEventListeners();
     this.getOrientationElement();
@@ -49,7 +70,8 @@ AFRAME.registerComponent('thumbstick-controls', {
     if (
       !velocity[data.adAxis] &&
       !velocity[data.wsAxis] &&
-      isEmptyObject(this.thumbstick)
+      isEmptyObject(this.keys) &&
+      isEmptyObject(this.wheel)
     ) {
       return;
     }
@@ -73,17 +95,17 @@ AFRAME.registerComponent('thumbstick-controls', {
   },
 
   remove: function () {
-    this.removeThumbstickEventListeners();
+    this.removeKeyEventListeners();
     this.removeVisibilityEventListeners();
   },
 
   play: function () {
-    this.attachThumbstickEventListeners();
+    this.attachKeyEventListeners();
   },
 
   pause: function () {
-    this.thumbstick = {};
-    this.removeThumbstickEventListeners();
+    this.keys = {};
+    this.removeKeyEventListeners();
   },
 
   getOrientationElement() {
@@ -113,7 +135,7 @@ AFRAME.registerComponent('thumbstick-controls', {
   updateVelocity: function (delta) {
     let adSign;
     const { data } = this;
-    const { thumbstick } = this;
+    const { keys } = this;
     const { velocity } = this;
     let wsSign;
 
@@ -142,28 +164,29 @@ AFRAME.registerComponent('thumbstick-controls', {
       velocity[wsAxis] = 0;
     }
 
-    // Update velocity using thumbstick pressed.
+    if (!data.enabled) {
+      return;
+    }
+
+    // Update velocity using keys pressed.
     if (data.adEnabled) {
       adSign = data.adInverted ? -1 : 1;
-      if (thumbstick.left) {
-        velocity[adAxis] -=
-          adSign * acceleration * delta * Math.abs(thumbstick.left);
+      if (keys.KeyA || keys.ArrowLeft) {
+        velocity[adAxis] -= adSign * acceleration * delta;
       }
-      if (thumbstick.right) {
-        velocity[adAxis] +=
-          adSign * acceleration * delta * Math.abs(thumbstick.right);
+      if (keys.KeyD || keys.ArrowRight) {
+        velocity[adAxis] += adSign * acceleration * delta;
       }
     }
     if (data.wsEnabled) {
       wsSign = data.wsInverted ? -1 : 1;
-      console.log(thumbstick.up);
-      if (thumbstick.up) {
-        velocity[wsAxis] -=
-          wsSign * acceleration * delta * Math.abs(thumbstick.up);
+      if (keys.KeyW || keys.ArrowUp || this.wheel.up) {
+        velocity[wsAxis] -= wsSign * acceleration * delta;
+        delete this.wheel.up;
       }
-      if (thumbstick.down) {
-        velocity[wsAxis] +=
-          wsSign * acceleration * delta * Math.abs(thumbstick.down);
+      if (keys.KeyS || keys.ArrowDown || this.wheel.down) {
+        velocity[wsAxis] += wsSign * acceleration * delta;
+        delete this.wheel.down;
       }
     }
   },
@@ -208,17 +231,16 @@ AFRAME.registerComponent('thumbstick-controls', {
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
   },
 
-  attachThumbstickEventListeners: function () {
-    const { el } = this;
-    el.addEventListener(MOVE_PLAYER, this.onThumbstickMovement);
-    el.addEventListener(STOP_PLAYER, this.onThumbstickStop);
+  attachKeyEventListeners: function () {
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+    window.addEventListener('wheel', this.onWheel);
   },
 
-  removeThumbstickEventListeners: function () {
-    const { el } = this;
-
-    el.removeEventListener(MOVE_PLAYER, this.onThumbstickMovement);
-    el.removeEventListener(STOP_PLAYER, this.onThumbstickStop);
+  removeKeyEventListeners: function () {
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
+    window.removeEventListener('wheel', this.onWheel);
   },
 
   onBlur: function () {
@@ -237,23 +259,26 @@ AFRAME.registerComponent('thumbstick-controls', {
     }
   },
 
-  onThumbstickMovement: function (event) {
-    const { id } = this.data;
-    const { hand, data } = event.detail;
-    if (hand === `${id}_rightHand`) {
-      if (data.x < 0) {
-        this.thumbstick.left = data.x;
-      } else if (data.x > 0) {
-        this.thumbstick.right = data.x;
-      }
-      if (data.y < 0) {
-        this.thumbstick.up = data.y;
-      } else if (data.y > 0) {
-        this.thumbstick.down = data.y;
-      }
+  onKeyDown: function (event) {
+    if (!shouldCaptureKeyEvent(event)) {
+      return;
+    }
+    const code = event.code || KEYCODE_TO_CODE[event.keyCode];
+    if (KEYS.indexOf(code) !== -1) {
+      this.keys[code] = true;
     }
   },
-  onThumbstickStop: function () {
-    this.thumbstick = {};
+
+  onKeyUp: function (event) {
+    const code = event.code || KEYCODE_TO_CODE[event.keyCode];
+    delete this.keys[code];
+  },
+
+  onWheel: function (event) {
+    if (event.deltaY > 0) {
+      this.wheel.down = true;
+    } else if (event.deltaY < 0) {
+      this.wheel.up = true;
+    }
   },
 });

@@ -17,7 +17,7 @@ import CA1 from '../../../assets/showcase-gallery/ca1_cell.png';
 import AuditoryCortex from '../../../assets/showcase-gallery/auditory_cortex.png';
 import '../aframe/interactable';
 import '../aframe/thumbstick-controls';
-import '../aframe/scroll-movement';
+import '../aframe/rig-wasd-controls';
 import { MAIN_MENU } from '../menu/menuStates';
 import {
   MENU_CLICK,
@@ -466,13 +466,13 @@ class Canvas extends Component {
         <a-entity
           id={cameraID}
           position="0 5 0"
-          thumbstick-controls
-          scroll-movement
+          thumbstick-controls={`id: ${id}; acceleration:200`}
+          rig-wasd-controls="fly:true; acceleration:200"
         >
           <a-camera
             cursor="rayOrigin: mouse"
             raycaster="objects: .collidable"
-            acceleration="200"
+            wasd-controls="enabled:false"
           />
           <LaserControls id={id} />
           {isMenuVisible ? (
