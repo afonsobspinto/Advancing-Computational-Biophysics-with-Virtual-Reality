@@ -466,7 +466,7 @@ class Canvas extends Component {
         <a-entity
           id={cameraID}
           position="0 5 0"
-          thumbstick-controls
+          thumbstick-controls={`id: ${id}; acceleration:200`}
           rig-wasd-controls="fly:true; acceleration:200"
         >
           <a-camera

@@ -7,3 +7,5 @@ export const FLIP_CAMERA = 'flip_camera';
 
 export const COLLAPSE_MENU = 'xbuttondown';
 export const BRING_CLOSER = 'abuttondown';
+export const MOVE_PLAYER = 'thumbstickmoved';
+export const STOP_PLAYER = 'thumbsticktouchend';

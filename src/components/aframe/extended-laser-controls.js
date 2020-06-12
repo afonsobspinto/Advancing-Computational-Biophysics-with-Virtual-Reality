@@ -1,4 +1,4 @@
-import { BRING_CLOSER } from '../Events';
+import { BRING_CLOSER, MOVE_PLAYER, STOP_PLAYER } from '../Events';
 
 function emitEvent(event, raycaster) {
   if (raycaster.intersectedEls.length > 0) {
@@ -52,8 +52,15 @@ AFRAME.registerComponent('extended-laser-controls', {
       emitEventSelected(BRING_CLOSER, model, null);
     });
 
-    el.addEventListener('thumbstickmoved', (evt) => {
-      const event = new CustomEvent('thumbstickmoved', { detail: evt.detail });
+    el.addEventListener(MOVE_PLAYER, (evt) => {
+      const event = new CustomEvent(MOVE_PLAYER, {
+        detail: { hand: el.id, data: evt.detail },
+      });
+      camera.dispatchEvent(event);
+    });
+
+    el.addEventListener(STOP_PLAYER, () => {
+      const event = new CustomEvent(STOP_PLAYER);
       camera.dispatchEvent(event);
     });
   },
