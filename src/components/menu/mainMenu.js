@@ -22,7 +22,7 @@ export default function mainMenu(model) {
   const visualGroups = {
     event: MENU_CLICK,
     evtDetail: VISUAL_GROUPS_MENU.id,
-    text: 'Show Potassium Distribution',
+    text: 'Apply Color Map',
     color: '#48BAEA',
   };
   const settings = {
