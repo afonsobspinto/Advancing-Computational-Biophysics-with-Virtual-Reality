@@ -8,6 +8,7 @@ export default class GeppettoThree {
   constructor(threshold = 2000) {
     this.threshold = threshold;
     this.complexity = 0;
+    // TODO: Meshes duplicated of visualModeMap
     this.meshes = {};
     this.splitMeshes = {};
     this.visualModelMap = {};
