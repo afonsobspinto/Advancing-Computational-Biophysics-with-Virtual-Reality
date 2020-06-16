@@ -11,6 +11,8 @@ import auditoryResults3 from './rawRecording_auditory/results3.dat';
 import auditoryResults4 from './rawRecording_auditory/results4.dat';
 import auditoryResults5 from './rawRecording_auditory/results5.dat';
 
+// TODO: Import only the models
+
 const models = [
   {
     name: 'auditory_cortex',

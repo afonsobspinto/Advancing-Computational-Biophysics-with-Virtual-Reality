@@ -10,7 +10,7 @@ AFRAME.registerComponent('interactable', {
   schema: {
     id: { type: 'string' },
     revesed: { default: true },
-    closerDistance: { default: 5 },
+    closerDistance: { default: 1 },
   },
   init: function () {
     const { el } = this;
@@ -62,11 +62,13 @@ AFRAME.registerComponent('interactable', {
     });
 
     el.addEventListener('gripup', (evt) => {
-      if (evt.detail === `${id}_rightHand`) {
-        this.rhand = null;
-      } else if (evt.detail === `${id}_leftHand`) {
-        this.lhand = null;
-      }
+      // if (evt.detail === `${id}_rightHand`) {
+      //   this.rhand = null;
+      // } else if (evt.detail === `${id}_leftHand`) {
+      //   this.lhand = null;
+      // }
+      this.rhand = null;
+      this.lhand = null;
     });
 
     el.addEventListener(BRING_CLOSER, () => {
