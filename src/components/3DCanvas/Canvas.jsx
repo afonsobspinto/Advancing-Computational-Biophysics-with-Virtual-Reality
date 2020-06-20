@@ -504,7 +504,7 @@ class Canvas extends Component {
           <a-entity
             scale="100, 100, 100"
             text="value: X; color:black;"
-            position="316, 32, 62.8"
+            position="270, 30, 167.8"
             rotation="180 0 0"
           />
         </a-entity>
