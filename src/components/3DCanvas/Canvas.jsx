@@ -304,6 +304,7 @@ class Canvas extends Component {
         this.hoveredMeshes = {
           ...evt.detail.getObject3D('mesh').material.color,
         };
+        console.log(`${evt.detail.id} Selected`);
       }
     }
   }
@@ -500,6 +501,12 @@ class Canvas extends Component {
                 interactable={`id: ${id}`}
               />
             ))}
+          <a-entity
+            scale="100, 100, 100"
+            text="value: X; color:black;"
+            position="316, 32, 62.8"
+            rotation="180 0 0"
+          />
         </a-entity>
       </a-scene>
     );

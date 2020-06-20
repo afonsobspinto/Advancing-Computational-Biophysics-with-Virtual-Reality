@@ -876,6 +876,7 @@ export default class GeppettoThree {
       color = color.replace(/0X/i, '#');
     }
     const meshes = this.getRealMeshesForInstancePath(instancePath);
+
     if (meshes.length > 0) {
       for (let i = 0; i < meshes.length; i++) {
         const mesh = meshes[i];
