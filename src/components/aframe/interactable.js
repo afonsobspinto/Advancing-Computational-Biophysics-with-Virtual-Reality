@@ -9,7 +9,7 @@ function clicked(target, detail) {
 AFRAME.registerComponent('interactable', {
   schema: {
     id: { type: 'string' },
-    revesed: { default: true },
+    reversed: { default: true },
     closerDistance: { default: 1 },
   },
   init: function () {
@@ -104,7 +104,7 @@ AFRAME.registerComponent('interactable', {
   },
   tick: function () {
     const { el } = this;
-    const { revesed, id } = this.data;
+    const { reversed, id } = this.data;
     if (el.selected || el.id === `${id}_model`) {
       if (this.rhand && this.lhand) {
         if (this.handOldPos.rhand && this.handOldPos.lhand) {
@@ -124,7 +124,7 @@ AFRAME.registerComponent('interactable', {
             this.rhand.object3D.rotation.y - this.previousHandRotation.rhand._y,
           // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
         };
-        if (revesed) {
+        if (reversed) {
           rotate = {
             x: rotate.x * -1,
             y: rotate.y * -1,
@@ -144,7 +144,7 @@ AFRAME.registerComponent('interactable', {
             this.lhand.object3D.rotation.y - this.previousHandRotation.lhand._y,
           // z: this.rhand.object3D.rotation.z - this.previousHandRotation._z,
         };
-        if (revesed) {
+        if (reversed) {
           rotate = {
             x: rotate.x * -1,
             y: rotate.y * -1,
