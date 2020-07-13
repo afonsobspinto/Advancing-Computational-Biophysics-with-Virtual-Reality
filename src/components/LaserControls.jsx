@@ -14,14 +14,14 @@ class LaserControls extends Component {
           id={`${id}_leftHand`}
           laser-controls="hand: left"
           line="color: blue"
-          raycaster="objects: .collidable"
+          raycaster="objects: .collidable; interval:500"
           extended-laser-controls={`id: ${id}`}
           // haptics="events: triggerdown; dur: 500; force: 1.0"
         />
         <a-entity
           id={`${id}_rightHand`}
           laser-controls="hand: right"
-          raycaster="objects: .collidable"
+          raycaster="objects: .collidable; interval:500"
           line="color: blue"
           extended-laser-controls={`id: ${id}`}
           // haptics="events: triggerdown; dur: 500; force: 1.0"
