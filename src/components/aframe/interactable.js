@@ -90,9 +90,20 @@ AFRAME.registerComponent('interactable', {
           const bbox = new THREE.Box3().setFromObject(el.object3D);
           const center = bbox.getCenter();
           const xDiff = el.object3D.position.x - center.x;
-          const yDiff = el.object3D.position.y - bbox.min.y;
+          const zDiff = this.getZDist(
+            camera.object3D.position,
+            el.object3D.position,
+            bbox,
+            'z'
+          );
+          const yDiff = this.getYDist(
+            camera.object3D.position,
+            el.object3D.position,
+            bbox,
+            'y'
+          );
           const cameraPos = { ...camera.object3D.position };
-          cameraPos.z += bbox.min.z - closerDistance;
+          cameraPos.z -= zDiff + closerDistance;
           cameraPos.y += yDiff;
           cameraPos.x += xDiff;
           // this.parent = el.parentNode.object3D;
@@ -164,5 +175,21 @@ AFRAME.registerComponent('interactable', {
     const leftXDecreasing =
       this.lhand.object3D.position.x - this.handOldPos.lhand.x <= 0;
     return rightXGrowing && leftXDecreasing;
+  },
+
+  getZDist(cameraPos, objPos, objBox, axis) {
+    const diff1 = Math.abs(cameraPos[axis] - objBox.min[axis]);
+    const diff2 = Math.abs(cameraPos[axis] - objBox.max[axis]);
+    const closerDist = diff1 < diff2 ? objBox.min[axis] : objBox.max[axis];
+    return Math.abs(objPos[axis] - closerDist);
+  },
+
+  getYDist(cameraPos, objPos, objBox, axis) {
+    const center = objBox.getCenter();
+    const diff = Math.abs(objPos[axis] - center[axis]);
+    if (cameraPos[axis] - diff < 0) {
+      return objBox.min[axis];
+    }
+    return diff;
   },
 });

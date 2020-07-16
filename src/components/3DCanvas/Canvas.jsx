@@ -497,13 +497,12 @@ class Canvas extends Component {
         </a-entity>
 
         <a-plane
-          position="0 4 -4"
+          position="0 0 -4"
           rotation="-90 0 0"
           width="100"
           height="100"
           color="#7BC8A4"
         />
-
         <a-entity
           ref={this.canvasRef}
           position={position}
