@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import { object } from 'prop-types';
 import { BRING_CLOSER } from '../Events';
 
 function clicked(target, detail) {
@@ -16,6 +17,7 @@ AFRAME.registerComponent('interactable', {
     const { el } = this;
     const { id } = this.data;
     const scene = document.getElementById(`${id}_scene`);
+    const model = document.getElementById(`${id}_model`);
     const camera = document.getElementById(`${id}_camera`);
     this.rhand = false;
     this.lhand = false;
@@ -75,16 +77,15 @@ AFRAME.registerComponent('interactable', {
       const { closerDistance } = this.data;
       if (el.selected || el.id === `${id}_model`) {
         if (this.originalPosition) {
-          // if (this.parent != null) {
-          //   this.parent.attach(el.object3D);
-          // }
+          if (el.id !== `${id}_model`) {
+            model.object3D.attach(el.object3D);
+          }
           el.object3D.position.set(
             this.originalPosition.x,
             this.originalPosition.y,
             this.originalPosition.z
           );
           this.originalPosition = null;
-          // this.parent = null;
         } else {
           this.originalPosition = { ...el.object3D.position };
           const closerPosition = this.getCloserPosition(
@@ -92,8 +93,7 @@ AFRAME.registerComponent('interactable', {
             camera.object3D.position,
             closerDistance
           );
-          // this.parent = el.parentNode.object3D;
-          // scene.object3D.attach(el.object3D);
+          scene.object3D.attach(el.object3D);
           el.object3D.position.set(
             closerPosition.x,
             closerPosition.y,
@@ -103,12 +103,13 @@ AFRAME.registerComponent('interactable', {
       }
     });
   },
-  getCloserPosition(object, cameraPos, closerDistance) {
-    const bbox = new THREE.Box3().setFromObject(object);
+  getCloserPosition(obj, cameraPos, closerDistance) {
+    const bbox = new THREE.Box3().setFromObject(obj);
     const center = bbox.getCenter();
-    const xDiff = object.position.x - center.x;
-    const zDiff = this.getZDist(cameraPos, object.position, bbox, 'z');
-    const yDiff = this.getYDist(cameraPos, object.position, bbox, 'y');
+    const position = obj.getWorldPosition();
+    const xDiff = position.x - center.x;
+    const zDiff = this.getZDist(cameraPos, position, bbox, 'z');
+    const yDiff = this.getYDist(cameraPos, position, bbox, 'y');
     const cPos = { ...cameraPos };
     cPos.z -= zDiff + closerDistance;
     cPos.y += yDiff;
@@ -193,5 +194,17 @@ AFRAME.registerComponent('interactable', {
       return objPos[axis] - objBox.min[axis] - cameraPos[axis];
     }
     return diff - cameraPos[axis];
+  },
+
+  convertToLocalCoordinates(newWorldPosition, obj) {
+    const localPosition = obj.position;
+    const worldPosition = obj.getWorldPosition();
+    newWorldPosition.x =
+      (newWorldPosition.x * localPosition.x) / worldPosition.x;
+    newWorldPosition.y =
+      (newWorldPosition.y * localPosition.y) / worldPosition.y;
+    newWorldPosition.z =
+      (newWorldPosition.z * localPosition.z) / worldPosition.z;
+    return newWorldPosition;
   },
 });
