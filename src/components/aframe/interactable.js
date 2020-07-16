@@ -87,31 +87,33 @@ AFRAME.registerComponent('interactable', {
           // this.parent = null;
         } else {
           this.originalPosition = { ...el.object3D.position };
-          const bbox = new THREE.Box3().setFromObject(el.object3D);
-          const center = bbox.getCenter();
-          const xDiff = el.object3D.position.x - center.x;
-          const zDiff = this.getZDist(
+          const closerPosition = this.getCloserPosition(
+            el.object3D,
             camera.object3D.position,
-            el.object3D.position,
-            bbox,
-            'z'
+            closerDistance
           );
-          const yDiff = this.getYDist(
-            camera.object3D.position,
-            el.object3D.position,
-            bbox,
-            'y'
-          );
-          const cameraPos = { ...camera.object3D.position };
-          cameraPos.z -= zDiff + closerDistance;
-          cameraPos.y += yDiff;
-          cameraPos.x += xDiff;
           // this.parent = el.parentNode.object3D;
           // scene.object3D.attach(el.object3D);
-          el.object3D.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
+          el.object3D.position.set(
+            closerPosition.x,
+            closerPosition.y,
+            closerPosition.z
+          );
         }
       }
     });
+  },
+  getCloserPosition(object, cameraPos, closerDistance) {
+    const bbox = new THREE.Box3().setFromObject(object);
+    const center = bbox.getCenter();
+    const xDiff = object.position.x - center.x;
+    const zDiff = this.getZDist(cameraPos, object.position, bbox, 'z');
+    const yDiff = this.getYDist(cameraPos, object.position, bbox, 'y');
+    const cPos = { ...cameraPos };
+    cPos.z -= zDiff + closerDistance;
+    cPos.y += yDiff;
+    cPos.x += xDiff;
+    return cPos;
   },
   tick: function () {
     const { el } = this;
@@ -188,8 +190,8 @@ AFRAME.registerComponent('interactable', {
     const center = objBox.getCenter();
     const diff = Math.abs(objPos[axis] - center[axis]);
     if (cameraPos[axis] - diff < 0) {
-      return objBox.min[axis];
+      return objPos[axis] - objBox.min[axis] - cameraPos[axis];
     }
-    return diff;
+    return diff - cameraPos[axis];
   },
 });
