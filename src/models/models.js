@@ -1,66 +1,66 @@
-// import auditoryCortex from './auditory_cortex.json';
+import auditoryCortex from './auditory_cortex.json';
 // import vfb from './vfb.json';
-import ca1 from './ca1_pyramidal_cell.json';
+// import ca1 from './ca1_pyramidal_cell.json';
 // import ca1OutputMapping from './rawRecording_ca1/outputMapping.dat';
-// import auditoryOutputMapping from './rawRecording_auditory/outputMapping.dat';
+import auditoryOutputMapping from './rawRecording_auditory/outputMapping.dat';
 // import ca1Results0 from './rawRecording_ca1/results0.dat';
-// import auditoryResults0 from './rawRecording_auditory/results0.dat';
-// import auditoryResults1 from './rawRecording_auditory/results1.dat';
-// import auditoryResults2 from './rawRecording_auditory/results2.dat';
-// import auditoryResults3 from './rawRecording_auditory/results3.dat';
-// import auditoryResults4 from './rawRecording_auditory/results4.dat';
-// import auditoryResults5 from './rawRecording_auditory/results5.dat';
+import auditoryResults0 from './rawRecording_auditory/results0.dat';
+import auditoryResults1 from './rawRecording_auditory/results1.dat';
+import auditoryResults2 from './rawRecording_auditory/results2.dat';
+import auditoryResults3 from './rawRecording_auditory/results3.dat';
+import auditoryResults4 from './rawRecording_auditory/results4.dat';
+import auditoryResults5 from './rawRecording_auditory/results5.dat';
 
 // TODO: Import only the models
 
 const models = [
-  // {
-  //   name: 'auditory_cortex',
-  //   model: auditoryCortex,
-  //   props: {
-  //     colorMap: {
-  //       'acnet2.baskets_12': '#003398',
-  //       'acnet2.pyramidals_48': '#cb0000',
-  //     },
-  //     position: '-20 18 -80',
-  //   },
-  //   imageID: '#auditory_cortex',
-  //   instances: ['acnet2'],
-  //   color: '#F85333',
-  //   visualGroups: false,
-  //   simulation: {
-  //     outputMapping: auditoryOutputMapping,
-  //     results: [
-  //       auditoryResults0,
-  //       auditoryResults1,
-  //       auditoryResults2,
-  //       auditoryResults3,
-  //       auditoryResults4,
-  //       auditoryResults5,
-  //     ],
-  //     step: 1,
-  //   },
-  // },
   {
-    name: 'ca1_pyramidal_cell',
-    model: ca1,
+    name: 'auditory_cortex',
+    model: auditoryCortex,
     props: {
       colorMap: {
-        network_CA1PyramidalCell: '0x009295',
+        'acnet2.baskets_12': '#003398',
+        'acnet2.pyramidals_48': '#cb0000',
       },
-      position: '5 12 -20',
-      rotation: '0 0 90',
+      position: '-20 18 -80',
     },
-    imageID: '#ca1',
-    instances: ['network_CA1PyramidalCell'],
-    color: '#48BAEA',
-    visualGroups: true,
-    // simulation: {
-    //   outputMapping: ca1OutputMapping,
-    //   results: [ca1Results0],
-    //   step: 1,
-    // },
+    imageID: '#auditory_cortex',
+    instances: ['acnet2'],
+    color: '#F85333',
+    visualGroups: false,
+    simulation: {
+      outputMapping: auditoryOutputMapping,
+      results: [
+        auditoryResults0,
+        auditoryResults1,
+        auditoryResults2,
+        auditoryResults3,
+        auditoryResults4,
+        auditoryResults5,
+      ],
+      step: 1,
+    },
   },
+  // {
+  //   name: 'ca1_pyramidal_cell',
+  //   model: ca1,
+  //   props: {
+  //     colorMap: {
+  //       network_CA1PyramidalCell: '0x009295',
+  //     },
+  //     position: '5 12 -20',
+  //     rotation: '0 0 90',
+  //   },
+  //   imageID: '#ca1',
+  //   instances: ['network_CA1PyramidalCell'],
+  //   color: '#48BAEA',
+  //   visualGroups: true,
+  //   // simulation: {
+  //   //   outputMapping: ca1OutputMapping,
+  //   //   results: [ca1Results0],
+  //   //   step: 1,
+  //   // },
+  // },
   // {
   //   name: 'vfb',
   //   model: vfb,

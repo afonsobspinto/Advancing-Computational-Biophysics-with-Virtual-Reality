@@ -26,6 +26,7 @@ import {
   VISUAL_GROUPS,
   RUN_SIMULATION,
   COLLAPSE_MENU,
+  BRING_CLOSER,
 } from '../Events';
 
 import {
@@ -37,6 +38,10 @@ import models from '../../models/models';
 
 const HOVER_COLOR = { r: 0.67, g: 0.84, b: 0.9 };
 const SELECTED_COLOR = { r: 1, g: 1, b: 0 };
+const SHORTCUTS = {
+  COLLAPSE_MENU: 109,
+  BRING_CLOSER: 99,
+};
 
 class Canvas extends Component {
   constructor(props) {
@@ -60,7 +65,7 @@ class Canvas extends Component {
     this.handleHoverLeave = this.handleHoverLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
-    this.handleMenuCollapse = this.handleMenuCollapse.bind(this);
+    this.handleKeyboardPress = this.handleKeyboardPress.bind(this);
     // TODO: remove this workaround
     this.showVisualGroups = this.showVisualGroups.bind(this);
     this.threeMeshes = {};
@@ -80,10 +85,10 @@ class Canvas extends Component {
     );
     this.sceneRef.current.addEventListener('mesh_click', this.handleClick);
     this.sceneRef.current.addEventListener('menu_click', this.handleMenuClick);
-    document.addEventListener('keypress', this.handleMenuCollapse);
+    document.addEventListener('keypress', this.handleKeyboardPress);
     this.sceneRef.current.addEventListener(
       COLLAPSE_MENU,
-      this.handleMenuCollapse
+      this.handleKeyboardPress
     );
     // TODO: remove this workaround
     this.sceneRef.current.addEventListener(VISUAL_GROUPS, (evt) =>
@@ -266,11 +271,25 @@ class Canvas extends Component {
     handleHoverLeave(evt, false);
   }
 
-  handleMenuCollapse(evt) {
+  handleKeyboardPress(evt) {
     // eslint-disable-next-line eqeqeq
-    if (evt.keyCode == undefined || evt.keyCode === 109) {
+    if (evt.keyCode === SHORTCUTS.COLLAPSE_MENU) {
       const { isMenuVisible } = this.state;
       this.setState({ isMenuVisible: !isMenuVisible });
+    } else if (evt.keyCode === SHORTCUTS.BRING_CLOSER) {
+      let toModel = true;
+      const cEvent = new CustomEvent(BRING_CLOSER, { detail: null });
+      for (const selected of Object.keys(this.selectedMeshes)) {
+        const el = document.getElementById(selected);
+        el.dispatchEvent(cEvent);
+        toModel = false;
+      }
+      if (toModel) {
+        const { id } = this.props;
+        const modelID = `${id}_model`;
+        const model = document.getElementById(modelID);
+        model.dispatchEvent(cEvent);
+      }
     }
   }
 
