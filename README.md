@@ -1,5 +1,5 @@
 # Advancing-Computational-Biophysics-with-Virtual-Reality
-A repository to host my master thesis developments at @FEUP
+A repository to host my [master thesis](FEUP_MIEIC_MSc_Thesis___Advancing_Computational_Biophysics_with_Virtual_Reality.pdf) developments at @FEUP
 
 ## How to develop
 1. `git clone https://github.com/afonsobspinto/Advancing-Computational-Biophysics-with-Virtual-Reality.git`
